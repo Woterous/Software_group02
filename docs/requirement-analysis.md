@@ -67,7 +67,7 @@ The current TA recruitment process depends on disconnected forms, emails, and sp
 | NFR-02 | Storage | Data must be stored in text-based files (`.txt`, `.csv`, `.json`, `.xml`) |
 | NFR-03 | Usability | Core workflow should be learnable without training for first-time users |
 | NFR-04 | Reliability | Invalid data input must be validated and blocked |
-| NFR-05 | Maintainability | Architecture must remain modular (UI, service, storage separation) |
+| NFR-05 | Maintainability | Architecture must remain modular with clear controller, service, entity, and storage separation |
 | NFR-06 | Traceability | Requirements must map to user stories and backlog entries |
 
 ## 7. Constraints and Assumptions

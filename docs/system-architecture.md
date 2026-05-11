@@ -7,33 +7,47 @@ The architecture is designed to satisfy three constraints from the coursework:
 - extensible enough for Sprint 3/4 feature growth
 
 ## 2. Layered Design
-The system uses a 3-layer architecture.
+The system uses a 4-layer architecture. The entity layer is documented explicitly because
+the core data objects are shared by the controller, service, and storage layers.
 
-### Layer 1: User Interface Layer
+### Layer 1: Controller Layer
 Responsibilities:
-- render role-based screens
-- collect and validate input format
-- invoke service operations
+- route JSP pages and API endpoints
+- parse request parameters, JSON bodies, and multipart uploads
+- enforce session and role access checks
+- invoke service operations and return JSP or JSON responses
 
-Representative screens:
-- Login / Register
-- TA Dashboard / Job List / Job Detail
-- MO Dashboard / Applicant Review
-- Admin Dashboard / Workload View
+Representative modules:
+- `PageRouterServlet`: page routing for public, TA, MO, and Admin screens
+- `AuthApiServlet`: authentication and registration endpoints
+- `TaApiServlet`, `MoApiServlet`, `AdminApiServlet`: role-specific API endpoints
 
 ### Layer 2: Application Service Layer
 Responsibilities:
 - enforce business rules
 - orchestrate cross-entity operations
-- expose use-case-level methods to UI layer
+- keep role workflows out of controller code
+- expose use-case-level methods to the controller layer
 
 Core services:
 - `UserService`: register, authenticate, profile operations
-- `JobService`: publish, list, and detail retrieval
-- `ApplicationService`: apply, status transition, history retrieval
-- `AdminService` (or equivalent module): global views and workload statistics
+- `JobService`: TA-facing job list and detail retrieval
+- `ApplicationService`: TA application submission, status visibility, and dashboard data
+- `MoService`: MO job posting, applicant review, and decision workflow
+- `AdminService`: global user/application views and workload statistics
 
-### Layer 3: File Storage Layer
+### Layer 3: Entity Layer
+Responsibilities:
+- define the core business data structures
+- provide shared data contracts between service and storage
+- keep entity fields aligned with JSON persistence files and API schemas
+
+Core entities:
+- `User`
+- `Job`
+- `Application`
+
+### Layer 4: File Storage Layer
 Responsibilities:
 - read and write structured files
 - maintain entity-level persistence consistency
@@ -45,11 +59,10 @@ Default storage baseline:
 - `applications.json`
 
 ## 3. Technology Decision
-Implementation option selected for current baseline:
-- Java stand-alone implementation path (course-compliant)
-
-Alternative acceptable path:
-- Java Web (Servlet/JSP) with the same service and storage boundary
+Implementation option selected for the current baseline:
+- Java Web application using Servlet/JSP + HTML/CSS/JS
+- Maven WAR packaging for Tomcat deployment
+- JSON file persistence through the storage layer
 
 Non-negotiable constraint:
 - no relational database
@@ -76,4 +89,4 @@ The architecture reserves extension points for optional features:
 - skill gap analysis
 - workload balancing recommendation
 
-These are add-on modules and must not break the core 3-layer separation.
+These are add-on modules and must not break the core 4-layer separation.

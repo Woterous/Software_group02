@@ -1,12 +1,13 @@
-# Data Model
+# Entity and Data Model
 
 ## 1. Overview
-The Sprint baseline data model contains three core entities:
+The system data model is represented by the entity layer. It contains three core entities:
 - User
 - Job
 - Application
 
-The model is designed for file-based persistence and direct alignment with user stories and backlog fields.
+The entity layer is shared by the controller, service, and storage layers. It is designed for
+file-based persistence and direct alignment with user stories, backlog fields, and API schemas.
 
 ## 2. Entity Definitions
 ### 2.1 User
@@ -17,9 +18,11 @@ Storage file: `users.json`
 | `userId` | String | Yes | Unique identifier |
 | `name` | String | Yes | Display name |
 | `email` | String | Yes | Unique login/contact key |
-| `password` | String | Yes | Stored securely in implementation phase |
-| `role` | Enum | Yes | `TA`, `MO`, `ADMIN` |
+| `password` | String | Yes | Stored in the user record for coursework-scale authentication |
+| `role` | Enum | Yes | `ta`, `mo`, `admin` |
 | `skills` | List/String | Optional | Used for review/matching |
+| `major` | String | Optional | Academic major or faculty label |
+| `contact` | String | Optional | Contact number or other contact detail |
 | `cvPath` | String | Optional | File reference for uploaded CV |
 
 ### 2.2 Job
@@ -33,7 +36,10 @@ Storage file: `jobs.json`
 | `description` | String | Yes | Job summary |
 | `requiredSkills` | List/String | Yes | Candidate screening basis |
 | `deadline` | Date | Yes | Application deadline |
+| `status` | Enum | Yes | `open`, `closing`, `closed` |
 | `postedBy` | String | Optional | MO reference (`userId`) |
+| `weeklyHours` | Integer | Optional | Estimated weekly TA workload |
+| `createdAt` | Date | Optional | Posting date |
 
 ### 2.3 Application
 Storage file: `applications.json`
@@ -43,10 +49,9 @@ Storage file: `applications.json`
 | `applicationId` | String | Yes | Unique identifier |
 | `userId` | String | Yes | TA reference |
 | `jobId` | String | Yes | Job reference |
-| `status` | Enum | Yes | `Pending`, `Selected`, `Rejected` |
+| `status` | Enum | Yes | `pending`, `selected`, `rejected` |
 | `reviewNote` | String | Optional | MO/Admin note |
-| `createdAt` | DateTime | Optional | Submission timestamp |
-| `updatedAt` | DateTime | Optional | Last status update timestamp |
+| `updatedAt` | Date | Optional | Last status update date |
 
 ## 3. Relationship Model
 - One User (TA) can submit many Applications
@@ -72,3 +77,4 @@ To keep sprint continuity:
   - requirement-analysis
   - user-stories acceptance criteria
   - product backlog notes
+  - API schema documentation

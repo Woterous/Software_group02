@@ -28,7 +28,12 @@ Key milestones:
 | `docs/` | Requirement, architecture, model, plan, and traceability docs |
 | `prototype/` | UI prototype source images |
 | `report/` | Formal report documents and Sprint backlog artefact |
-| `src/` | Source code implementation |
+| `src/main/java/com/group02/tars/controller/` | Servlet page/API routing layer |
+| `src/main/java/com/group02/tars/service/` | Business workflow and validation layer |
+| `src/main/java/com/group02/tars/entity/` | Core entity definitions shared across layers |
+| `src/main/java/com/group02/tars/storage/` | JSON file persistence layer |
+| `src/main/webapp/` | JSP pages and static frontend assets |
+| `src/test/` | JUnit service-layer tests |
 
 ## 4. Documentation Index
 - Requirements analysis: [docs/requirement-analysis.md](docs/requirement-analysis.md)
@@ -48,12 +53,11 @@ To avoid duplicated content and conflicting statements:
 - `report/` stores formal assessment-facing narrative
 
 ## 6. Current Status
-Current focus is Sprint 1 completion quality:
-- clear and testable requirements
-- full user story coverage with acceptance criteria
-- prioritised and estimated backlog
-- architecture and data model consistency
-- requirement-to-deliverable traceability
+Current focus is Sprint 3-4 finalization:
+- role workflows across TA, MO, and Admin
+- controller/service/entity/storage architecture consistency
+- cross-role data integrity and permission checks
+- test evidence, documentation, and final delivery readiness
 
 ## 7. Delivery Principle
 The project is managed as a software engineering process, not only a coding task:
