@@ -58,4 +58,25 @@ class AdminServiceImplTest {
         assertEquals(22, workload.get(0).get("totalHours"));
         assertEquals("warning", workload.get(0).get("riskLevel"));
     }
+
+    @Test
+    void listApplicationsShouldSupportDirectJobIdFiltering() throws Exception {
+        InMemoryFileStorage storage = new InMemoryFileStorage()
+            .withUsers(List.of(
+                user("TA001", "James Wilson", "james@school.edu", "Pass123!", "ta"),
+                user("TA002", "Emma Clark", "emma@school.edu", "Pass123!", "ta")))
+            .withJobs(List.of(
+                job("JOB001", "TA for Software Engineering", "EBU6304", "open", "2026-04-01"),
+                job("JOB002", "TA for Database Systems", "EBU6305", "open", "2026-04-01")))
+            .withApplications(List.of(
+                application("APP001", "TA001", "JOB001", "pending", "2026-04-01"),
+                application("APP002", "TA002", "JOB002", "selected", "2026-04-01")));
+        AdminServiceImpl service = new AdminServiceImpl(storage);
+
+        List<Map<String, Object>> applications = service.listApplications("", "", "", "JOB002");
+
+        assertEquals(1, applications.size());
+        assertEquals("APP002", applications.get(0).get("applicationId"));
+        assertEquals("JOB002", applications.get(0).get("jobId"));
+    }
 }
