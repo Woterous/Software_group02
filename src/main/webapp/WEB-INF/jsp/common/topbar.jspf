@@ -15,9 +15,34 @@
     </div>
     <nav class="topbar-right">
         <span class="role-pill role-pill--<%= topbarRole %>"><%= topbarRole.toUpperCase() %></span>
+        <% if (!"public".equals(topbarRole)) { %>
+        <button class="ghost-btn topbar-action-btn" type="button" data-action="ai-open">AI Assistant</button>
+        <% } %>
         <button class="ghost-btn topbar-action-btn" type="button" data-action="theme-toggle">Appearance</button>
         <% if (!"public".equals(topbarRole)) { %>
         <button class="ghost-btn topbar-action-btn" type="button" data-action="logout">Logout</button>
         <% } %>
     </nav>
 </header>
+<% if (!"public".equals(topbarRole)) { %>
+<div class="global-ai-backdrop hidden" data-action="ai-close"></div>
+<aside class="global-ai-panel hidden" id="global-ai-assistant" aria-label="Global AI assistant">
+    <div class="global-ai-head">
+        <div>
+            <span class="section-kicker">GLM assistant</span>
+            <h2>Ask your workspace</h2>
+        </div>
+        <button class="ghost-btn" type="button" data-action="ai-close">Close</button>
+    </div>
+    <div class="global-ai-status" id="global-ai-status">Checking model status...</div>
+    <div class="global-ai-messages" id="global-ai-messages">
+        <div class="global-ai-message assistant">
+            Ask about this recruitment workspace, current role workflow, workload risks, candidate review, or what to do next.
+        </div>
+    </div>
+    <form class="global-ai-form" id="global-ai-form">
+        <textarea name="message" rows="3" placeholder="Ask GLM about this page or your next action..." required></textarea>
+        <button class="primary-btn" type="submit">Ask GLM</button>
+    </form>
+</aside>
+<% } %>

@@ -406,10 +406,11 @@ window.PageModules.ta = window.PageModules.ta || {};
                 return;
             }
             const provider = data.provider || {};
+            const assistantText = data.modelAnalysis || data.guidance || provider.message || "Review the generated matches before applying.";
             aiOutput.innerHTML = `
                 <div class="ai-provider-note">
                     <span>${window.UIKit.escapeHtml(provider.mode || "tool-only")}</span>
-                    <p>${window.UIKit.escapeHtml(data.guidance || provider.message || "Review the generated matches before applying.")}</p>
+                    <p>${window.UIKit.escapeHtml(assistantText)}</p>
                 </div>
                 ${rows.map((row) => `
                     <article class="ai-result-card">

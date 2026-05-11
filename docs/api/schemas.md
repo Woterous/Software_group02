@@ -134,6 +134,14 @@ cvFile: binary
 }
 ```
 
+### AiChatRequest
+```json
+{
+  "page": "workload",
+  "message": "Which workload issue should I handle first?"
+}
+```
+
 ### TaApplicationCreateRequest
 ```json
 {

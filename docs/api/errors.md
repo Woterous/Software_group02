@@ -71,7 +71,8 @@
 | Code | Meaning |
 |---|---|
 | `AI_PROVIDER_NOT_CONFIGURED` | Reserved for future provider call mode when a model key is required |
-| `AI_PROVIDER_FAILED` | Reserved for future provider call failures |
+| `AI_PROVIDER_FAILED` | Provider call failed or was interrupted |
+| `AI_PROVIDER_EMPTY_RESPONSE` | Provider responded successfully but no usable text was returned |
 
 ## 3. Error Response Example
 ```json

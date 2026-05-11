@@ -72,7 +72,9 @@ Integration mode:
 - Do not hardcode API keys in repository files.
 - Read model credentials from `TARS_AI_API_KEY` or `AI_API_KEY`.
 - Read model name from `TARS_AI_MODEL` or `AI_MODEL`.
+- Read provider base URL from `TARS_AI_BASE_URL` or `AI_BASE_URL`; default is `https://api.z.ai/api/paas/v4`.
 - Keep deterministic tool output available even when no provider is configured.
+- Provider calls should receive structured tool context; the model must not be trusted as the source of record.
 - For multimodal CV analysis, the provider adapter should read the authorized local file from `data/uploads` and submit the file content using the selected model's native file/document input format.
 
 ## 8. Contract freeze rule

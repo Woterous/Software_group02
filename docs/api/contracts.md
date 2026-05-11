@@ -304,11 +304,12 @@ Query params:
 
 ## 6. AI Assistant Endpoints
 
-AI endpoints return deterministic tool output when no model provider is configured. They are designed so a future native multimodal model can consume the same structured context plus the secured/local CV file reference.
+AI endpoints call the configured provider when model credentials are available. They still return deterministic tool output when no model provider is configured, or when the provider call fails.
 
 Provider configuration:
 - `TARS_AI_API_KEY` or `AI_API_KEY`
 - `TARS_AI_MODEL` or `AI_MODEL`
+- `TARS_AI_BASE_URL` or `AI_BASE_URL`
 
 ### GET `/ai/status`
 Return provider readiness and current assistant mode.
@@ -410,6 +411,44 @@ Request body:
 ```json
 {
   "riskLevel": "overload"
+}
+```
+
+### POST `/ai/chat`
+Ask the global workspace assistant a page-level question.
+
+Request body:
+```json
+{
+  "page": "workload",
+  "message": "Which TA is most risky right now and why?"
+}
+```
+
+Success response (`200`):
+```json
+{
+  "success": true,
+  "data": {
+    "provider": {
+      "providerReady": true,
+      "mode": "provider-ready",
+      "provider": "z.ai",
+      "model": "glm-4.6v"
+    },
+    "role": "admin",
+    "page": "workload",
+    "modelCalled": true,
+    "answer": "The highest risk is...",
+    "model": "glm-4.6v",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 300,
+      "completion_tokens": 120
+    }
+  },
+  "meta": null,
+  "error": null
 }
 ```
 

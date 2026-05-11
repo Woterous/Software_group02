@@ -531,6 +531,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnvelopeObject'
 
+  /ai/chat:
+    post:
+      tags: [AI]
+      summary: Ask global workspace assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiChatRequest'
+      responses:
+        '200':
+          description: Assistant answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeObject'
+
 components:
   parameters:
     page:
@@ -742,6 +760,13 @@ components:
       type: object
       properties:
         riskLevel: { type: string, enum: [normal, warning, overload] }
+
+    AiChatRequest:
+      type: object
+      required: [message]
+      properties:
+        page: { type: string }
+        message: { type: string }
 
     EnvelopeError:
       type: object

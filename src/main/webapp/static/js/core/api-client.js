@@ -173,6 +173,9 @@
         async aiAdminRiskAnalysis(payload = {}) {
             return fetchJson("/ai/admin/risk-analysis", { method: "POST", body: JSON.stringify(payload) });
         },
+        async aiChat(payload = {}) {
+            return fetchJson("/ai/chat", { method: "POST", body: JSON.stringify(payload) });
+        },
 
         async adminDashboard() {
             if (this.mode === "mock") return fromMock(window.MockEngine.admin.dashboard());
