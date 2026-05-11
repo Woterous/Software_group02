@@ -19,6 +19,7 @@ It is **decision-complete** for backend implementation:
 | `schemas.md` | Field dictionary and entity schema rules |
 | `errors.md` | HTTP statuses and business error codes |
 | `integration-guidelines.md` | Auth, filters, sorting, idempotency, and mock-to-real policy |
+| `sprint3-api-sync.md` | Sprint 3 real-backend API synchronisation notes |
 
 ## 3. Base Conventions
 - Base path: `/api/v1`
@@ -85,3 +86,6 @@ It is **decision-complete** for backend implementation:
 | `/pages/admin/users` | `GET /admin/users` |
 | `/pages/admin/applications` | `GET /admin/applications` |
 | `/pages/admin/workload` | `GET /admin/workload` |
+
+
+
