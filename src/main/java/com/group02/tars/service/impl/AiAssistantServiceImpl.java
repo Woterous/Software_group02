@@ -1,5 +1,6 @@
 package com.group02.tars.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group02.tars.entity.Application;
 import com.group02.tars.entity.Job;
 import com.group02.tars.entity.User;
@@ -24,27 +25,29 @@ import java.util.Set;
 public class AiAssistantServiceImpl implements AiAssistantService {
     private static final int OVERLOAD_HOURS = 28;
     private static final int WARNING_HOURS = 20;
+    private static final String SYSTEM_PROMPT = """
+        You are the embedded AI assistant for a teaching assistant recruitment system.
+        Use only the provided JSON context. Do not invent users, jobs, decisions, files, or policies.
+        Be concise, practical, and decision-oriented. If evidence is missing, say what needs to be checked.
+        Return plain English that can be displayed directly in the web UI.
+        """;
 
     private final FileStorage storage;
+    private final AiProvider provider;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public AiAssistantServiceImpl(FileStorage storage) {
+        this(storage, new ZaiAiProvider());
+    }
+
+    AiAssistantServiceImpl(FileStorage storage, AiProvider provider) {
         this.storage = Objects.requireNonNull(storage);
+        this.provider = Objects.requireNonNull(provider);
     }
 
     @Override
     public Map<String, Object> providerStatus() {
-        String apiKey = firstNonBlank(System.getenv("TARS_AI_API_KEY"), System.getenv("AI_API_KEY"));
-        String model = firstNonBlank(System.getenv("TARS_AI_MODEL"), System.getenv("AI_MODEL"));
-
-        Map<String, Object> status = new LinkedHashMap<>();
-        status.put("providerReady", apiKey != null);
-        status.put("mode", apiKey == null ? "tool-only" : "provider-ready");
-        status.put("model", model == null ? "" : model);
-        status.put("multimodalCvReady", apiKey != null && model != null);
-        status.put("message", apiKey == null
-            ? "No AI API key is configured. The system is returning deterministic tool output only."
-            : "AI provider variables are configured. A provider adapter can consume the tool output and CV file reference.");
-        return status;
+        return provider.status();
     }
 
     @Override
@@ -100,6 +103,14 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         data.put("student", student);
         data.put("recommendations", rows.stream().limit(5).toList());
         data.put("guidance", "Review the highest-score jobs first, then confirm deadline and workload fit before applying.");
+        attachProviderAnalysis(
+            data,
+            "TA job recommendation",
+            "Explain which roles the TA should prioritize. Mention strongest fits, risks, missing evidence, and next action.",
+            Map.of("student", student, "recommendations", data.get("recommendations"), "localGuidance", data.get("guidance")),
+            "modelAnalysis",
+            900
+        );
         return data;
     }
 
@@ -145,8 +156,28 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         data.put("cv", cv);
         data.put("matchedSkills", match.matched());
         data.put("missingSkills", match.missing());
-        data.put("summary", buildCandidateSummary(applicant, job, application, match, cvFileName));
+        String deterministicSummary = buildCandidateSummary(applicant, job, application, match, cvFileName);
+        data.put("summary", deterministicSummary);
+        data.put("deterministicSummary", deterministicSummary);
         data.put("reviewQuestions", buildReviewQuestions(match, cvFileName));
+        attachProviderAnalysis(
+            data,
+            "MO candidate review summary",
+            "Write a review brief for the module owner. Include candidate fit, CV availability, missing evidence, and interview/review questions.",
+            Map.of(
+                "candidate", candidate,
+                "job", jobData,
+                "cv", cv,
+                "matchedSkills", match.matched(),
+                "missingSkills", match.missing(),
+                "applicationStatus", application.status,
+                "reviewNote", ServiceSupport.normalize(application.reviewNote),
+                "localSummary", deterministicSummary,
+                "reviewQuestions", data.get("reviewQuestions")
+            ),
+            "summary",
+            1000
+        );
         return data;
     }
 
@@ -201,8 +232,229 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         data.put("provider", providerStatus());
         data.put("riskPeople", people);
         data.put("roleSignals", roleSignals);
-        data.put("summary", buildAdminSummary(people, roleSignals));
+        String deterministicSummary = buildAdminSummary(people, roleSignals);
+        data.put("summary", deterministicSummary);
+        data.put("deterministicSummary", deterministicSummary);
+        attachProviderAnalysis(
+            data,
+            "Admin workload risk analysis",
+            "Analyze workload and recruitment risks for an administrator. Prioritize concrete risks and operational actions.",
+            Map.of("riskPeople", people, "roleSignals", roleSignals, "localSummary", deterministicSummary),
+            "summary",
+            1000
+        );
         return data;
+    }
+
+    @Override
+    public Map<String, Object> chat(String userId, String role, String page, String message)
+        throws IOException, ServiceException {
+        String normalizedMessage = ServiceSupport.normalize(message);
+        if (normalizedMessage.isBlank()) {
+            throw new ServiceException(422, "VALIDATION_REQUIRED_FIELD", "Field message is required.");
+        }
+
+        User current = findUser(userId);
+        String normalizedRole = ServiceSupport.lower(role);
+        if (!normalizedRole.equals(ServiceSupport.lower(current.role))) {
+            throw new ServiceException(HttpServletResponse.SC_FORBIDDEN, "AUTH_FORBIDDEN_ROLE", "Session role does not match current user.");
+        }
+
+        Map<String, Object> context = buildGlobalAssistantContext(current, normalizedRole, page);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("provider", providerStatus());
+        data.put("role", normalizedRole);
+        data.put("page", ServiceSupport.normalize(page));
+        data.put("modelCalled", false);
+
+        if (!provider.isReady()) {
+            data.put("answer", "The AI provider is not configured. I can see your role context, but cannot call the model yet.");
+            return data;
+        }
+
+        String userPrompt = """
+            User question:
+            %s
+
+            Current role/page context:
+            %s
+
+            Answer in a way that helps the user operate this exact TA recruitment system.
+            If the user asks for an action that should be done through a page, name the page and the next click.
+            """.formatted(normalizedMessage, toJson(context));
+
+        AiProviderResult result = provider.complete(SYSTEM_PROMPT, userPrompt, 1100);
+        data.put("modelCalled", true);
+        data.put("answer", result.content());
+        data.put("model", result.model());
+        data.put("finishReason", result.finishReason());
+        data.put("usage", result.usage());
+        return data;
+    }
+
+    private void attachProviderAnalysis(
+        Map<String, Object> data,
+        String task,
+        String instruction,
+        Object context,
+        String outputKey,
+        int maxTokens
+    ) {
+        data.put("modelCalled", false);
+        if (!provider.isReady()) {
+            data.put("modelUnavailableReason", "AI provider is not configured.");
+            return;
+        }
+
+        try {
+            String userPrompt = """
+                Task: %s
+
+                Instruction:
+                %s
+
+                Structured context:
+                %s
+                """.formatted(task, instruction, toJson(context));
+            AiProviderResult result = provider.complete(SYSTEM_PROMPT, userPrompt, maxTokens);
+            data.put("modelCalled", true);
+            data.put(outputKey, result.content());
+            data.put("modelAnalysis", result.content());
+            data.put("model", result.model());
+            data.put("finishReason", result.finishReason());
+            data.put("usage", result.usage());
+        } catch (Exception ex) {
+            data.put("modelCalled", false);
+            data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> buildGlobalAssistantContext(User current, String role, String page) throws IOException {
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put("currentUser", safeUserMap(current));
+        context.put("role", role);
+        context.put("page", ServiceSupport.normalize(page));
+
+        List<User> users = storage.loadUsers();
+        List<Job> jobs = storage.loadJobs();
+        List<Application> applications = storage.loadApplications();
+        context.put("systemSnapshot", Map.of(
+            "users", users.size(),
+            "jobs", jobs.size(),
+            "applications", applications.size()
+        ));
+
+        if ("ta".equals(role)) {
+            context.put("openJobs", jobs.stream()
+                .filter(job -> List.of("open", "closing").contains(ServiceSupport.lower(job.status)))
+                .limit(8)
+                .map(this::jobMap)
+                .toList());
+            context.put("myApplications", applications.stream()
+                .filter(app -> ServiceSupport.normalize(current.userId).equals(ServiceSupport.normalize(app.userId)))
+                .map(this::applicationMap)
+                .toList());
+        } else if ("mo".equals(role)) {
+            List<String> ownedJobIds = jobs.stream()
+                .filter(job -> ServiceSupport.normalize(current.userId).equals(ServiceSupport.normalize(job.postedBy)))
+                .map(job -> ServiceSupport.normalize(job.jobId))
+                .toList();
+            context.put("myJobs", jobs.stream()
+                .filter(job -> ownedJobIds.contains(ServiceSupport.normalize(job.jobId)))
+                .map(this::jobMap)
+                .toList());
+            context.put("myApplications", applications.stream()
+                .filter(app -> ownedJobIds.contains(ServiceSupport.normalize(app.jobId)))
+                .map(this::applicationMap)
+                .toList());
+        } else if ("admin".equals(role)) {
+            context.put("recentApplications", applications.stream()
+                .sorted(Comparator.comparing((Application app) -> ServiceSupport.normalize(app.updatedAt)).reversed())
+                .limit(8)
+                .map(this::applicationMap)
+                .toList());
+            context.put("workloadRiskPreview", buildWorkloadRows(users, jobs, applications, "").stream().limit(8).toList());
+        }
+        return context;
+    }
+
+    private Map<String, Object> safeUserMap(User user) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("userId", user.userId);
+        row.put("name", user.name);
+        row.put("email", user.email);
+        row.put("role", user.role);
+        row.put("skills", user.skills == null ? List.of() : user.skills);
+        row.put("major", user.major);
+        row.put("contact", user.contact);
+        row.put("cvUploaded", !ServiceSupport.normalize(user.cvPath).isBlank());
+        return row;
+    }
+
+    private Map<String, Object> jobMap(Job job) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("jobId", job.jobId);
+        row.put("title", job.title);
+        row.put("moduleName", job.moduleName);
+        row.put("requiredSkills", job.requiredSkills);
+        row.put("deadline", job.deadline);
+        row.put("status", job.status);
+        row.put("weeklyHours", job.weeklyHours);
+        row.put("postedBy", job.postedBy);
+        return row;
+    }
+
+    private Map<String, Object> applicationMap(Application app) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("applicationId", app.applicationId);
+        row.put("userId", app.userId);
+        row.put("jobId", app.jobId);
+        row.put("status", app.status);
+        row.put("reviewNote", app.reviewNote);
+        row.put("updatedAt", app.updatedAt);
+        return row;
+    }
+
+    private List<Map<String, Object>> buildWorkloadRows(List<User> users, List<Job> jobs, List<Application> applications, String riskLevel) {
+        String filter = ServiceSupport.lower(riskLevel);
+        Map<String, Job> jobById = new LinkedHashMap<>();
+        for (Job job : jobs) {
+            jobById.put(ServiceSupport.normalize(job.jobId), job);
+        }
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (User user : users) {
+            if (!"ta".equals(ServiceSupport.lower(user.role))) {
+                continue;
+            }
+            List<Application> selected = applications.stream()
+                .filter(app -> ServiceSupport.normalize(user.userId).equals(ServiceSupport.normalize(app.userId)))
+                .filter(app -> "selected".equals(ServiceSupport.lower(app.status)))
+                .toList();
+            int totalHours = selected.stream()
+                .map(app -> jobById.get(ServiceSupport.normalize(app.jobId)))
+                .filter(job -> job != null && job.weeklyHours != null)
+                .mapToInt(job -> job.weeklyHours)
+                .sum();
+            String risk = totalHours >= OVERLOAD_HOURS ? "overload" : totalHours >= WARNING_HOURS ? "warning" : "normal";
+            if (!filter.isBlank() && !filter.equals(risk)) {
+                continue;
+            }
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("userId", user.userId);
+            row.put("name", user.name);
+            row.put("riskLevel", risk);
+            row.put("selectedModules", selected.size());
+            row.put("totalHours", totalHours);
+            row.put("reason", workloadReason(risk, totalHours));
+            rows.add(row);
+        }
+        rows.sort(Comparator.comparing((Map<String, Object> row) -> Integer.parseInt(String.valueOf(row.get("totalHours")))).reversed());
+        return rows;
+    }
+
+    private String toJson(Object value) throws IOException {
+        return mapper.writeValueAsString(value);
     }
 
     private User findUser(String userId) throws IOException, ServiceException {

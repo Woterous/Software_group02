@@ -32,6 +32,7 @@ public class AiApiServlet extends BaseApiServlet {
         String path = normalizePath(req);
         try {
             switch (path) {
+                case "/chat" -> handleChat(req, resp);
                 case "/ta/job-recommendations" -> handleTaJobRecommendations(req, resp);
                 case "/mo/candidate-summary" -> handleMoCandidateSummary(req, resp);
                 case "/admin/risk-analysis" -> handleAdminRiskAnalysis(req, resp);
@@ -49,6 +50,19 @@ public class AiApiServlet extends BaseApiServlet {
         if (current == null) return;
         JsonResponse.writeSuccess(resp, HttpServletResponse.SC_OK,
             registry.aiAssistantService().recommendJobsForTa(current.userId), null);
+    }
+
+    private void handleChat(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServiceException {
+        User current = requireSessionUser(req, resp, "ta", "mo", "admin");
+        if (current == null) return;
+        Map<String, Object> body = readBodyAsMap(req);
+        JsonResponse.writeSuccess(resp, HttpServletResponse.SC_OK,
+            registry.aiAssistantService().chat(
+                current.userId,
+                current.role,
+                asString(body, "page"),
+                asString(body, "message")
+            ), null);
     }
 
     private void handleMoCandidateSummary(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServiceException {

@@ -12,4 +12,7 @@ public interface AiAssistantService {
         throws IOException, ServiceException;
 
     Map<String, Object> analyzeAdminRisk(String riskLevel) throws IOException;
+
+    Map<String, Object> chat(String userId, String role, String page, String message)
+        throws IOException, ServiceException;
 }
