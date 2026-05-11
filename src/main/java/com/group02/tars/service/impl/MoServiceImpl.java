@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MoServiceImpl implements MoService {
+    private static final int MAX_SELECTED_WEEKLY_HOURS = 28;
 
     private final FileStorage storage;
 
@@ -90,7 +92,7 @@ public class MoServiceImpl implements MoService {
         job.title = required(title, "title");
         job.moduleName = required(moduleName, "moduleName");
         job.requiredSkills = required(requiredSkills, "requiredSkills");
-        job.deadline = required(deadline, "deadline");
+        job.deadline = validateDeadline(required(deadline, "deadline"));
         job.description = required(description, "description");
         job.status = enumOrDefault(status, List.of("open", "closing", "closed"), "open");
         job.postedBy = safe(moUserId);
@@ -111,7 +113,7 @@ public class MoServiceImpl implements MoService {
         if (!safe(title).isBlank()) job.title = safe(title);
         if (!safe(moduleName).isBlank()) job.moduleName = safe(moduleName);
         if (!safe(requiredSkills).isBlank()) job.requiredSkills = safe(requiredSkills);
-        if (!safe(deadline).isBlank()) job.deadline = safe(deadline);
+        if (!safe(deadline).isBlank()) job.deadline = validateDeadline(deadline);
         if (!safe(description).isBlank()) job.description = safe(description);
         if (!safe(status).isBlank()) job.status = enumOrDefault(status, List.of("open", "closing", "closed"), job.status);
         if (!safe(weeklyHours).isBlank()) job.weeklyHours = toIntOrDefault(weeklyHours, job.weeklyHours == null ? 6 : job.weeklyHours);
@@ -196,7 +198,17 @@ public class MoServiceImpl implements MoService {
 
         List<Application> applications = storage.loadApplications();
         Application app = findApplication(applications, safe(applicationId));
-        requireOwnedApplicationJob(storage.loadJobs(), safe(moUserId), app);
+        List<Job> jobs = storage.loadJobs();
+        Job job = requireOwnedApplicationJob(jobs, safe(moUserId), app);
+
+        if ("selected".equals(nextStatus)) {
+            int projectedHours = selectedHoursForTa(app.userId, applications, jobs, app.applicationId)
+                + (job.weeklyHours == null ? 0 : job.weeklyHours);
+            if (projectedHours >= MAX_SELECTED_WEEKLY_HOURS) {
+                throw new ServiceException(422, "APPLICATION_OVER_ASSIGNMENT",
+                    "Selecting this applicant would exceed the TA workload limit.");
+            }
+        }
 
         app.status = nextStatus;
         app.reviewNote = safe(reviewNote);
@@ -238,11 +250,36 @@ public class MoServiceImpl implements MoService {
         return owned;
     }
 
+    private int selectedHoursForTa(String userId, List<Application> applications, List<Job> jobs, String excludedApplicationId) {
+        Map<String, Job> jobById = jobs.stream().collect(LinkedHashMap::new, (m, j) -> m.put(j.jobId, j), Map::putAll);
+        return applications.stream()
+            .filter(a -> safe(userId).equals(a.userId))
+            .filter(a -> !safe(excludedApplicationId).equals(a.applicationId))
+            .filter(a -> "selected".equalsIgnoreCase(safe(a.status)))
+            .map(a -> jobById.get(a.jobId))
+            .filter(j -> j != null && j.weeklyHours != null)
+            .mapToInt(j -> j.weeklyHours)
+            .sum();
+    }
+
     private String required(String value, String field) throws ServiceException {
         if (safe(value).isBlank()) {
             throw new ServiceException(422, "VALIDATION_REQUIRED_FIELD", "Field " + field + " is required.");
         }
         return value.trim();
+    }
+
+    private String validateDeadline(String rawDeadline) throws ServiceException {
+        String normalized = safe(rawDeadline);
+        try {
+            LocalDate deadline = LocalDate.parse(normalized);
+            if (deadline.isBefore(LocalDate.now())) {
+                throw new ServiceException(422, "JOB_DEADLINE_INVALID", "Deadline must be today or a future date.");
+            }
+            return normalized;
+        } catch (DateTimeParseException ex) {
+            throw new ServiceException(422, "JOB_DEADLINE_INVALID", "Deadline must use YYYY-MM-DD format.");
+        }
     }
 
     private String enumOrDefault(String value, List<String> allowed, String defaultValue) {
