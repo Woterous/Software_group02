@@ -1,6 +1,6 @@
 package com.group02.tars.controller.api;
 
-import com.group02.tars.model.User;
+import com.group02.tars.entity.User;
 import com.group02.tars.service.ServiceException;
 import com.group02.tars.util.DataDirectoryResolver;
 import com.group02.tars.util.JsonResponse;

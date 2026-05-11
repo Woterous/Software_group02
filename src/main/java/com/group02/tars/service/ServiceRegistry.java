@@ -1,7 +1,9 @@
 package com.group02.tars.service;
 
 import com.group02.tars.service.impl.ApplicationServiceImpl;
+import com.group02.tars.service.impl.AdminServiceImpl;
 import com.group02.tars.service.impl.JobServiceImpl;
+import com.group02.tars.service.impl.MoServiceImpl;
 import com.group02.tars.service.impl.UserServiceImpl;
 import com.group02.tars.storage.FileStorage;
 import com.group02.tars.storage.JsonFileStorage;
@@ -17,12 +19,16 @@ public class ServiceRegistry {
     private final UserService userService;
     private final JobService jobService;
     private final ApplicationService applicationService;
+    private final MoService moService;
+    private final AdminService adminService;
 
     private ServiceRegistry(ServletContext context) throws IOException {
         this.storage = new JsonFileStorage(context);
         this.userService = new UserServiceImpl(storage);
         this.jobService = new JobServiceImpl(storage);
         this.applicationService = new ApplicationServiceImpl(storage);
+        this.moService = new MoServiceImpl(storage);
+        this.adminService = new AdminServiceImpl(storage);
     }
 
     public static ServiceRegistry from(ServletContext context) throws IOException {
@@ -47,6 +53,14 @@ public class ServiceRegistry {
 
     public ApplicationService applicationService() {
         return applicationService;
+    }
+
+    public MoService moService() {
+        return moService;
+    }
+
+    public AdminService adminService() {
+        return adminService;
     }
 
     public FileStorage storage() {

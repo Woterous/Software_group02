@@ -1,4 +1,4 @@
-package com.group02.tars.model;
+package com.group02.tars.entity;
 
 public class Job {
     public String jobId;

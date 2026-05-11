@@ -1,6 +1,6 @@
 package com.group02.tars.service.impl;
 
-import com.group02.tars.model.Job;
+import com.group02.tars.entity.Job;
 import com.group02.tars.service.JobService;
 import com.group02.tars.service.ServiceException;
 import com.group02.tars.storage.FileStorage;

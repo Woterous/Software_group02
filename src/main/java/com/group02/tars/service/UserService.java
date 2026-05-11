@@ -1,6 +1,6 @@
 package com.group02.tars.service;
 
-import com.group02.tars.model.User;
+import com.group02.tars.entity.User;
 
 import java.io.IOException;
 

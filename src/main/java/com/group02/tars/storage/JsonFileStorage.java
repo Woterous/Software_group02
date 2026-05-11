@@ -3,9 +3,9 @@ package com.group02.tars.storage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.group02.tars.model.Application;
-import com.group02.tars.model.Job;
-import com.group02.tars.model.User;
+import com.group02.tars.entity.Application;
+import com.group02.tars.entity.Job;
+import com.group02.tars.entity.User;
 import com.group02.tars.util.DataDirectoryResolver;
 import jakarta.servlet.ServletContext;
 

@@ -1,6 +1,6 @@
 package com.group02.tars.service.impl;
 
-import com.group02.tars.model.User;
+import com.group02.tars.entity.User;
 import com.group02.tars.service.ServiceException;
 import com.group02.tars.service.UserService;
 import com.group02.tars.storage.FileStorage;

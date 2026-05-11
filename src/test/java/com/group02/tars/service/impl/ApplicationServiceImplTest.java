@@ -1,6 +1,6 @@
 package com.group02.tars.service.impl;
 
-import com.group02.tars.model.Application;
+import com.group02.tars.entity.Application;
 import com.group02.tars.service.ServiceException;
 import com.group02.tars.support.InMemoryFileStorage;
 import org.junit.jupiter.api.Test;
