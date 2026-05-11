@@ -391,10 +391,60 @@ window.PageModules.ta = window.PageModules.ta || {};
         const form = document.getElementById("ta-job-filter-form");
         const listEl = document.getElementById("ta-job-list");
         const paginationEl = document.getElementById("ta-jobs-pagination");
+        const aiBtn = document.getElementById("ta-ai-match-btn");
+        const aiOutput = document.getElementById("ta-ai-recommendations");
         let currentPage = 1;
 
         const modules = window.ApiClient.lookups.modules();
         window.UIKit.setSelectOptions(form.module, modules, "value", "label", true, "All Modules");
+
+        const renderAiRecommendations = (data) => {
+            const rows = data.recommendations || [];
+            if (!aiOutput) return;
+            if (!rows.length) {
+                renderEmptyState(aiOutput, "No AI matches available", "Complete your profile skills or check again when new jobs are posted.");
+                return;
+            }
+            const provider = data.provider || {};
+            aiOutput.innerHTML = `
+                <div class="ai-provider-note">
+                    <span>${window.UIKit.escapeHtml(provider.mode || "tool-only")}</span>
+                    <p>${window.UIKit.escapeHtml(data.guidance || provider.message || "Review the generated matches before applying.")}</p>
+                </div>
+                ${rows.map((row) => `
+                    <article class="ai-result-card">
+                        <div class="ai-result-head">
+                            <div>
+                                <span class="section-kicker">${window.UIKit.escapeHtml(row.moduleName || "-")}</span>
+                                <h4>${window.UIKit.escapeHtml(row.title || "-")}</h4>
+                            </div>
+                            <strong class="ai-score">${window.UIKit.escapeHtml(row.score)}%</strong>
+                        </div>
+                        <p>${window.UIKit.escapeHtml(row.rationale || "")}</p>
+                        <div class="ai-chip-row">
+                            ${(row.matchedSkills || []).map((skill) => `<span class="skill-pill">${window.UIKit.escapeHtml(skill)}</span>`).join("")}
+                            ${row.alreadyApplied ? '<span class="badge pending">already applied</span>' : ""}
+                        </div>
+                        <a class="text-link" href="${window.APP_CONTEXT}/pages/ta/job-detail?id=${window.UIKit.escapeHtml(row.jobId)}">Open role detail</a>
+                    </article>
+                `).join("")}
+            `;
+        };
+
+        if (aiBtn && aiOutput) {
+            aiBtn.addEventListener("click", async () => {
+                aiBtn.disabled = true;
+                aiOutput.innerHTML = '<div class="ai-loading-card">Generating profile-based matches...</div>';
+                const result = await window.ApiClient.aiTaJobRecommendations();
+                aiBtn.disabled = false;
+                if (!result.success) {
+                    window.UIKit.toast(result.error.message, "error");
+                    aiOutput.innerHTML = "";
+                    return;
+                }
+                renderAiRecommendations(result.data);
+            });
+        }
 
         const load = async (page = 1) => {
             currentPage = page;

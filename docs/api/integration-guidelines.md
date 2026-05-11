@@ -5,6 +5,7 @@
 - Login sets session state.
 - Logout clears session state.
 - All role APIs (`/ta/*`, `/mo/*`, `/admin/*`) require authenticated session.
+- AI APIs (`/ai/*`) and secured file APIs (`/files/*`) also require authenticated session.
 - Role mismatch should return `403` with `AUTH_FORBIDDEN_ROLE`.
 
 ## 2. Response Envelope Rules
@@ -67,7 +68,14 @@ Integration mode:
 3. implement backend endpoints as documented
 4. validate endpoint parity against `openapi.yaml`
 
-## 7. Contract freeze rule
+## 7. AI provider integration policy
+- Do not hardcode API keys in repository files.
+- Read model credentials from `TARS_AI_API_KEY` or `AI_API_KEY`.
+- Read model name from `TARS_AI_MODEL` or `AI_MODEL`.
+- Keep deterministic tool output available even when no provider is configured.
+- For multimodal CV analysis, the provider adapter should read the authorized local file from `data/uploads` and submit the file content using the selected model's native file/document input format.
+
+## 8. Contract freeze rule
 Before Sprint 2 demo freeze, do not change:
 - endpoint paths
 - request/response field names
@@ -79,7 +87,7 @@ If change is unavoidable:
 3. update `INDEX.md`
 4. update frontend adapter and impacted pages in same commit
 
-## 8. Backend handoff checklist
+## 9. Backend handoff checklist
 - [ ] all endpoints in `openapi.yaml` implemented
 - [ ] status/error codes follow `errors.md`
 - [ ] auth/session behavior validated

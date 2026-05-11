@@ -7,6 +7,18 @@
 <div class="workspace">
     <%@ include file="/WEB-INF/jsp/common/sidebar.jspf" %>
     <main class="content-area" id="admin-workload-page">
+        <section class="panel ai-assistant-panel glass-panel reveal-up">
+            <div class="panel-head panel-head--rich">
+                <div>
+                    <span class="section-kicker">AI risk assistant</span>
+                    <h2>Workload Risk Analysis</h2>
+                </div>
+                <button class="primary-btn" id="admin-ai-risk-btn" type="button">Analyze Risk</button>
+            </div>
+            <p class="panel-description">Reviews selected workload, pending role coverage, and deadline pressure to surface operational risks.</p>
+            <div id="admin-ai-risk-output" class="ai-result-stack"></div>
+        </section>
+
         <section class="panel glass-panel reveal-up">
             <div class="panel-head">
                 <h2>TA Workload Overview</h2>

@@ -120,6 +120,20 @@
 cvFile: binary
 ```
 
+### AiCandidateSummaryRequest
+```json
+{
+  "applicationId": "APP003"
+}
+```
+
+### AiRiskAnalysisRequest
+```json
+{
+  "riskLevel": "overload"
+}
+```
+
 ### TaApplicationCreateRequest
 ```json
 {
@@ -170,6 +184,8 @@ cvFile: binary
 - `role` must be one of `ta`, `mo`, `admin`.
 - `deadline` must match `YYYY-MM-DD` and should be current or future date.
 - CV upload only accepts `.pdf`, `.doc`, `.docx`, and max size `5MB`.
+- CV viewing only accepts a single sanitized file name from `data/uploads`.
+- AI endpoints must not require a model key to return deterministic tool output.
 - Application uniqueness key: `(userId, jobId)`.
 - Status transition:
   - initial status: `pending`

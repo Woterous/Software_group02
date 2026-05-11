@@ -2653,6 +2653,122 @@ a:hover {
     word-break: break-word;
 }
 
+.ai-assistant-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.ai-result-stack {
+    display: grid;
+    gap: 12px;
+}
+
+.ai-provider-note,
+.ai-loading-card,
+.ai-result-card {
+    border: 1px solid rgba(208, 215, 207, 0.9);
+    border-radius: 22px;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(241, 247, 242, 0.74)),
+        radial-gradient(circle at 12% 10%, rgba(31, 106, 94, 0.08), transparent 38%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.ai-provider-note,
+.ai-loading-card {
+    padding: 14px 16px;
+}
+
+.ai-provider-note span {
+    display: inline-flex;
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 999px;
+    color: var(--accent-strong);
+    background: rgba(222, 239, 231, 0.9);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ai-provider-note p,
+.ai-result-card p {
+    margin: 8px 0 0;
+    color: var(--text-1);
+    line-height: 1.6;
+}
+
+.ai-result-card {
+    padding: 16px;
+}
+
+.ai-result-card--quiet {
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.ai-result-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ai-result-head h4 {
+    margin: 4px 0 0;
+}
+
+.ai-score {
+    min-width: 58px;
+    min-height: 58px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(145deg, var(--accent-strong), #2d826e);
+    box-shadow: 0 14px 24px rgba(31, 106, 94, 0.18);
+}
+
+.ai-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.ai-question-list {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: var(--text-1);
+    line-height: 1.7;
+}
+
+.ai-grid-two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ai-mini-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(208, 215, 207, 0.72);
+}
+
+.ai-mini-row:last-child {
+    border-bottom: 0;
+}
+
+.panel-divider {
+    height: 1px;
+    margin: 18px 0;
+    background: linear-gradient(90deg, transparent, rgba(208, 215, 207, 0.96), transparent);
+}
+
 .filter-shell {
     display: grid;
     gap: 16px;

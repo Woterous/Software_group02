@@ -19,6 +19,18 @@
             </div>
         </section>
 
+        <section class="panel ai-assistant-panel glass-panel reveal-up">
+            <div class="panel-head panel-head--rich">
+                <div>
+                    <span class="section-kicker">AI match assistant</span>
+                    <h3>Find roles that fit your profile</h3>
+                </div>
+                <button class="primary-btn" id="ta-ai-match-btn" type="button">Generate Matches</button>
+            </div>
+            <p class="panel-description">Uses your profile skills, current openings, deadlines, and previous applications to rank suitable roles.</p>
+            <div id="ta-ai-recommendations" class="ai-result-stack"></div>
+        </section>
+
         <section class="panel jobs-filter-panel glass-panel reveal-up">
             <div class="panel-head panel-head--rich">
                 <div>

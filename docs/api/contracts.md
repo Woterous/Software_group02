@@ -142,6 +142,24 @@ Success response (`200`):
 ### DELETE `/ta/profile/cv`
 Remove CV path reference.
 
+### GET `/files/cv/{fileName}`
+Stream a stored CV file from the project-local `data/uploads` directory.
+
+Access rules:
+- TA can view only their own CV.
+- MO can view a CV only when the TA has applied to one of the MO's jobs.
+- Admin can view CV files for audit/risk monitoring.
+
+Path rules:
+- `fileName` must be a single file name, not a nested path.
+- Allowed extensions: `.pdf`, `.doc`, `.docx`.
+- Path traversal is rejected with `400 CV_INVALID_PATH`.
+
+Success response:
+- HTTP `200`
+- Content type is inferred from the file extension.
+- `Content-Disposition: inline`
+
 ### GET `/ta/jobs`
 List jobs with filtering and pagination.
 
@@ -284,12 +302,156 @@ Query params:
 
 ---
 
-## 6. Idempotency and Conflict Rules
+## 6. AI Assistant Endpoints
+
+AI endpoints return deterministic tool output when no model provider is configured. They are designed so a future native multimodal model can consume the same structured context plus the secured/local CV file reference.
+
+Provider configuration:
+- `TARS_AI_API_KEY` or `AI_API_KEY`
+- `TARS_AI_MODEL` or `AI_MODEL`
+
+### GET `/ai/status`
+Return provider readiness and current assistant mode.
+
+Success response (`200`):
+```json
+{
+  "success": true,
+  "data": {
+    "provider": {
+      "providerReady": false,
+      "mode": "tool-only",
+      "model": "",
+      "multimodalCvReady": false,
+      "message": "No AI API key is configured. The system is returning deterministic tool output only."
+    }
+  },
+  "meta": null,
+  "error": null
+}
+```
+
+### POST `/ai/ta/job-recommendations`
+Generate profile-based job recommendations for the current TA.
+
+Success response (`200`):
+```json
+{
+  "success": true,
+  "data": {
+    "provider": { "mode": "tool-only" },
+    "student": {
+      "userId": "TA001",
+      "name": "Emma Thompson",
+      "skills": ["Java", "OOP", "Tutoring"]
+    },
+    "recommendations": [
+      {
+        "jobId": "JOB001",
+        "title": "TA for Software Engineering",
+        "moduleName": "EBU6304",
+        "score": 100,
+        "matchedSkills": ["java", "oop"],
+        "missingSkills": [],
+        "alreadyApplied": true,
+        "rationale": "Matches java, oop. Deadline in 7 day(s)."
+      }
+    ],
+    "guidance": "Review the highest-score jobs first, then confirm deadline and workload fit before applying."
+  },
+  "meta": null,
+  "error": null
+}
+```
+
+### POST `/ai/mo/candidate-summary`
+Generate a candidate review brief for an MO-owned application.
+
+Request body:
+```json
+{
+  "applicationId": "APP003"
+}
+```
+
+Success response (`200`):
+```json
+{
+  "success": true,
+  "data": {
+    "applicationId": "APP003",
+    "candidate": {
+      "userId": "TA002",
+      "name": "James Wilson",
+      "skills": ["Algorithms", "Python", "Data Structures"]
+    },
+    "cv": {
+      "uploaded": true,
+      "cvPath": "/uploads/james_cv.pdf",
+      "fileName": "james_cv.pdf",
+      "multimodalInputHint": "Use the secured CV file endpoint or local upload file as the multimodal document input."
+    },
+    "matchedSkills": ["data structures"],
+    "missingSkills": ["algorithms"],
+    "summary": "James Wilson is applying for TA for Data Structures...",
+    "reviewQuestions": [
+      "Does the CV confirm teaching, lab support, or assessment experience?"
+    ]
+  },
+  "meta": null,
+  "error": null
+}
+```
+
+### POST `/ai/admin/risk-analysis`
+Generate workload and role-level risk signals.
+
+Request body:
+```json
+{
+  "riskLevel": "overload"
+}
+```
+
+Success response (`200`):
+```json
+{
+  "success": true,
+  "data": {
+    "riskPeople": [
+      {
+        "userId": "TA004",
+        "name": "Michael Brown",
+        "riskLevel": "overload",
+        "selectedModules": 4,
+        "totalHours": 30,
+        "reason": "Selected workload is at or above 28 hours."
+      }
+    ],
+    "roleSignals": [
+      {
+        "jobId": "JOB004",
+        "moduleName": "EBU6302",
+        "riskLevel": "deadline",
+        "pendingApplications": 2,
+        "reason": "Pending applications remain close to the deadline."
+      }
+    ],
+    "summary": "Detected 1 overload TA(s), 0 warning TA(s), and 1 role-level risk signal(s)."
+  },
+  "meta": null,
+  "error": null
+}
+```
+
+---
+
+## 7. Idempotency and Conflict Rules
 - `POST /ta/applications` is not idempotent and returns `409` when duplicate.
 - `PUT /mo/applications/{applicationId}/status` is idempotent for same status payload.
 - `POST /auth/register` returns `409` when email already exists.
 
-## 7. Frontend Adapter Alignment
+## 8. Frontend Adapter Alignment
 `src/main/webapp/static/js/core/api-client.js` method names map 1:1 to this contract.
 No backend endpoint should be renamed without updating:
 - this file

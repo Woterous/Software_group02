@@ -12,6 +12,8 @@ tags:
   - name: TA
   - name: MO
   - name: Admin
+  - name: Files
+  - name: AI
 
 paths:
   /auth/register:
@@ -165,6 +167,39 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '422':
           $ref: '#/components/responses/ValidationError'
+
+  /files/cv/{fileName}:
+    get:
+      tags: [Files]
+      summary: View secured CV file
+      parameters:
+        - in: path
+          name: fileName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CV file stream
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/msword:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
 
   /ta/jobs:
     get:
@@ -432,6 +467,70 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnvelopeWorkload'
 
+  /ai/status:
+    get:
+      tags: [AI]
+      summary: Get AI provider status
+      responses:
+        '200':
+          description: Provider readiness
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeObject'
+
+  /ai/ta/job-recommendations:
+    post:
+      tags: [AI]
+      summary: Generate TA job recommendations
+      responses:
+        '200':
+          description: Ranked job recommendations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeObject'
+
+  /ai/mo/candidate-summary:
+    post:
+      tags: [AI]
+      summary: Generate MO candidate summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiCandidateSummaryRequest'
+      responses:
+        '200':
+          description: Candidate summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeObject'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /ai/admin/risk-analysis:
+    post:
+      tags: [AI]
+      summary: Generate admin workload risk analysis
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiRiskAnalysisRequest'
+      responses:
+        '200':
+          description: Workload and role-level risk signals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeObject'
+
 components:
   parameters:
     page:
@@ -633,6 +732,17 @@ components:
         status: { type: string, enum: [selected, rejected] }
         reviewNote: { type: string }
 
+    AiCandidateSummaryRequest:
+      type: object
+      required: [applicationId]
+      properties:
+        applicationId: { type: string }
+
+    AiRiskAnalysisRequest:
+      type: object
+      properties:
+        riskLevel: { type: string, enum: [normal, warning, overload] }
+
     EnvelopeError:
       type: object
       properties:
@@ -651,6 +761,16 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/User'
+        meta: { nullable: true }
+        error: { nullable: true }
+
+    EnvelopeObject:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        data:
+          type: object
+          additionalProperties: true
         meta: { nullable: true }
         error: { nullable: true }
 

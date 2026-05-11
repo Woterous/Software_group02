@@ -201,6 +201,8 @@ window.PageModules.mo = window.PageModules.mo || {};
 
         const app = result.data.application;
         const cvUrl = app.cvPath ? window.ApiClient.cvFileUrl(app.cvPath) : "";
+        const aiBtn = document.getElementById("mo-ai-summary-btn");
+        const aiOutput = document.getElementById("mo-ai-summary");
         document.getElementById("mo-review-candidate").innerHTML = `
             <strong>${window.UIKit.escapeHtml(app.applicantName)}</strong>
             <div class="job-meta">
@@ -226,6 +228,43 @@ window.PageModules.mo = window.PageModules.mo || {};
 
         const noteEl = document.getElementById("mo-review-note");
         noteEl.value = app.reviewNote || "";
+
+        if (aiBtn && aiOutput) {
+            aiBtn.addEventListener("click", async () => {
+                aiBtn.disabled = true;
+                aiOutput.innerHTML = '<div class="ai-loading-card">Generating candidate review summary...</div>';
+                const summaryResult = await window.ApiClient.aiMoCandidateSummary(app.applicationId);
+                aiBtn.disabled = false;
+                if (!summaryResult.success) {
+                    window.UIKit.toast(summaryResult.error.message, "error");
+                    aiOutput.innerHTML = "";
+                    return;
+                }
+                const data = summaryResult.data;
+                const cv = data.cv || {};
+                aiOutput.innerHTML = `
+                    <article class="ai-result-card">
+                        <div class="ai-result-head">
+                            <div>
+                                <span class="section-kicker">${window.UIKit.escapeHtml(data.provider?.mode || "tool-only")}</span>
+                                <h4>Review brief</h4>
+                            </div>
+                            <span class="badge ${cv.uploaded ? "selected" : "pending"}">${cv.uploaded ? "cv available" : "cv missing"}</span>
+                        </div>
+                        <p>${window.UIKit.escapeHtml(data.summary || "")}</p>
+                        <div class="ai-chip-row">
+                            ${(data.matchedSkills || []).map((skill) => `<span class="skill-pill">${window.UIKit.escapeHtml(skill)}</span>`).join("")}
+                        </div>
+                    </article>
+                    <article class="ai-result-card ai-result-card--quiet">
+                        <strong>Questions to verify</strong>
+                        <ul class="ai-question-list">
+                            ${(data.reviewQuestions || []).map((question) => `<li>${window.UIKit.escapeHtml(question)}</li>`).join("")}
+                        </ul>
+                    </article>
+                `;
+            });
+        }
 
         document.getElementById("mo-select-btn").addEventListener("click", () => submitStatus("selected", app.applicationId, noteEl.value));
         document.getElementById("mo-reject-btn").addEventListener("click", () => submitStatus("rejected", app.applicationId, noteEl.value));

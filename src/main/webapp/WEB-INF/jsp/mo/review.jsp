@@ -20,6 +20,15 @@
                 </div>
             </article>
             <article class="panel glass-panel">
+                <div class="panel-head panel-head--rich">
+                    <div>
+                        <span class="section-kicker">AI review assistant</span>
+                        <h3>Candidate Summary</h3>
+                    </div>
+                    <button class="ghost-btn" id="mo-ai-summary-btn" type="button">Generate Summary</button>
+                </div>
+                <div id="mo-ai-summary" class="ai-result-stack"></div>
+                <div class="panel-divider"></div>
                 <div class="panel-head"><h3>Skill Match Matrix</h3></div>
                 <div id="mo-skill-match" class="list-stack"></div>
             </article>

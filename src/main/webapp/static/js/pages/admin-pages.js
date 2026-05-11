@@ -141,6 +141,8 @@ window.PageModules.admin = window.PageModules.admin || {};
 
         const form = document.getElementById("admin-workload-filter-form");
         const table = document.getElementById("admin-workload-table");
+        const aiBtn = document.getElementById("admin-ai-risk-btn");
+        const aiOutput = document.getElementById("admin-ai-risk-output");
 
         const load = async () => {
             const params = {
@@ -165,6 +167,48 @@ window.PageModules.admin = window.PageModules.admin || {};
             event.preventDefault();
             load();
         });
+
+        if (aiBtn && aiOutput) {
+            aiBtn.addEventListener("click", async () => {
+                aiBtn.disabled = true;
+                aiOutput.innerHTML = '<div class="ai-loading-card">Analyzing workload and role-level risks...</div>';
+                const result = await window.ApiClient.aiAdminRiskAnalysis({ riskLevel: form.riskLevel.value });
+                aiBtn.disabled = false;
+                if (!result.success) {
+                    window.UIKit.toast(result.error.message, "error");
+                    aiOutput.innerHTML = "";
+                    return;
+                }
+                const data = result.data;
+                aiOutput.innerHTML = `
+                    <div class="ai-provider-note">
+                        <span>${window.UIKit.escapeHtml(data.provider?.mode || "tool-only")}</span>
+                        <p>${window.UIKit.escapeHtml(data.summary || "No risk summary generated.")}</p>
+                    </div>
+                    <div class="ai-grid-two">
+                        <article class="ai-result-card">
+                            <h4>People risk</h4>
+                            ${(data.riskPeople || []).slice(0, 4).map((row) => `
+                                <div class="ai-mini-row">
+                                    <strong>${window.UIKit.escapeHtml(row.name)}</strong>
+                                    <span>${window.UIKit.escapeHtml(row.totalHours)} hrs/week</span>
+                                    ${window.UIKit.badge(row.riskLevel)}
+                                </div>
+                            `).join("") || '<p class="muted">No people risk under the selected filter.</p>'}
+                        </article>
+                        <article class="ai-result-card">
+                            <h4>Role signals</h4>
+                            ${(data.roleSignals || []).slice(0, 4).map((row) => `
+                                <div class="ai-mini-row">
+                                    <strong>${window.UIKit.escapeHtml(row.moduleName)}</strong>
+                                    <span>${window.UIKit.escapeHtml(row.reason)}</span>
+                                </div>
+                            `).join("") || '<p class="muted">No role-level risk signal detected.</p>'}
+                        </article>
+                    </div>
+                `;
+            });
+        }
 
         await load();
     }

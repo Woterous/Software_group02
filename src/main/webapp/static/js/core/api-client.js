@@ -161,6 +161,19 @@
             return fetchJson(`/mo/applications/${appId}/status`, { method: "PUT", body: JSON.stringify({ status, reviewNote }) });
         },
 
+        async aiStatus() {
+            return fetchJson("/ai/status", { method: "GET" });
+        },
+        async aiTaJobRecommendations() {
+            return fetchJson("/ai/ta/job-recommendations", { method: "POST", body: JSON.stringify({}) });
+        },
+        async aiMoCandidateSummary(applicationId) {
+            return fetchJson("/ai/mo/candidate-summary", { method: "POST", body: JSON.stringify({ applicationId }) });
+        },
+        async aiAdminRiskAnalysis(payload = {}) {
+            return fetchJson("/ai/admin/risk-analysis", { method: "POST", body: JSON.stringify(payload) });
+        },
+
         async adminDashboard() {
             if (this.mode === "mock") return fromMock(window.MockEngine.admin.dashboard());
             return fetchJson("/admin/dashboard", { method: "GET" });

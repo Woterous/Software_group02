@@ -32,6 +32,14 @@
 | `VALIDATION_INVALID_ENUM` | Unknown enum value |
 | `VALIDATION_DATE_RANGE` | Invalid date range |
 
+### CV_*
+| Code | Meaning |
+|---|---|
+| `CV_INVALID_PATH` | CV file name is blank, nested, or contains path traversal |
+| `CV_NOT_FOUND` | CV path is not attached to any user record |
+| `CV_FILE_NOT_FOUND` | CV path exists but the physical file is missing |
+| `CV_PERMISSION_DENIED` | Current user cannot view this CV |
+
 ### JOB_*
 | Code | Meaning |
 |---|---|
@@ -58,6 +66,12 @@
 | `SYSTEM_NOT_IMPLEMENTED` | Endpoint reserved but not implemented |
 | `SYSTEM_IO_FAILURE` | File storage failure |
 | `SYSTEM_UNKNOWN` | Unclassified internal error |
+
+### AI_*
+| Code | Meaning |
+|---|---|
+| `AI_PROVIDER_NOT_CONFIGURED` | Reserved for future provider call mode when a model key is required |
+| `AI_PROVIDER_FAILED` | Reserved for future provider call failures |
 
 ## 3. Error Response Example
 ```json
