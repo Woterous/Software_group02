@@ -276,11 +276,13 @@ window.PageModules.ta = window.PageModules.ta || {};
             profileForm.contact.value = profile.contact || "";
             const hasCv = !!profile.cvPath;
             const cvFileName = hasCv ? String(profile.cvPath).split("/").pop() : "";
+            const cvUrl = hasCv ? window.ApiClient.cvFileUrl(profile.cvPath) : "";
             cvCurrent.innerHTML = `
                 <span class="section-kicker">${hasCv ? "Document on file" : "CV missing"}</span>
                 <strong>${hasCv ? "Current CV uploaded and ready for review" : "Upload a CV to complete your application profile"}</strong>
                 <p>${window.UIKit.escapeHtml(hasCv ? cvFileName : "Module owners expect a current academic CV before reviewing your suitability.")}</p>
                 <span class="cv-status-meta">${window.UIKit.escapeHtml(hasCv ? profile.cvPath : "Accepted formats: PDF, DOC, DOCX up to 5MB")}</span>
+                ${hasCv && cvUrl ? `<a class="glass-secondary-btn inline cv-view-link" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : ""}
             `;
             cvCurrent.classList.toggle("is-empty", !hasCv);
         };

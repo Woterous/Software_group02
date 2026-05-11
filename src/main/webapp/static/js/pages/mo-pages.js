@@ -163,16 +163,21 @@ window.PageModules.mo = window.PageModules.mo || {};
                 window.UIKit.toast(result.error.message, "error");
                 return;
             }
-            table.innerHTML = result.data.applicants.map((row) => `
+            table.innerHTML = result.data.applicants.map((row) => {
+                const cvUrl = row.cvPath ? window.ApiClient.cvFileUrl(row.cvPath) : "";
+                return `
                 <tr>
                     <td>${window.UIKit.escapeHtml(row.applicantName)}</td>
                     <td>${window.UIKit.escapeHtml(row.title)}</td>
                     <td>${window.UIKit.escapeHtml(row.applicantSkills)}</td>
                     <td>${window.UIKit.badge(row.status)}</td>
-                    <td>${row.cvPath ? `<code>${window.UIKit.escapeHtml(row.cvPath)}</code>` : "-"}</td>
+                    <td>
+                        ${cvUrl ? `<a class="glass-secondary-btn inline table-action-btn" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : '<span class="muted">Not uploaded</span>'}
+                    </td>
                     <td><a class="ghost-btn inline" href="${window.APP_CONTEXT}/pages/mo/review?appId=${window.UIKit.escapeHtml(row.applicationId)}">Review</a></td>
                 </tr>
-            `).join("");
+            `;
+            }).join("");
         };
 
         form.addEventListener("submit", (event) => {
@@ -195,6 +200,7 @@ window.PageModules.mo = window.PageModules.mo || {};
         }
 
         const app = result.data.application;
+        const cvUrl = app.cvPath ? window.ApiClient.cvFileUrl(app.cvPath) : "";
         document.getElementById("mo-review-candidate").innerHTML = `
             <strong>${window.UIKit.escapeHtml(app.applicantName)}</strong>
             <div class="job-meta">
@@ -203,7 +209,13 @@ window.PageModules.mo = window.PageModules.mo || {};
                 <span>Module: ${window.UIKit.escapeHtml(app.moduleName)}</span>
                 <span>${window.UIKit.badge(app.status)}</span>
             </div>
-            <p class="muted">CV: ${app.cvPath ? window.UIKit.escapeHtml(app.cvPath) : "Not uploaded"}</p>
+            <div class="cv-review-strip">
+                <div>
+                    <span class="section-kicker">Candidate document</span>
+                    <p class="muted">${app.cvPath ? window.UIKit.escapeHtml(app.cvPath) : "No CV has been uploaded by this applicant."}</p>
+                </div>
+                ${cvUrl ? `<a class="glass-secondary-btn inline" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : '<span class="muted">Not uploaded</span>'}
+            </div>
         `;
 
         const skills = (app.applicantSkills || []).map((skill) => `<div class="stack-item">${window.UIKit.escapeHtml(skill)}</div>`).join("");

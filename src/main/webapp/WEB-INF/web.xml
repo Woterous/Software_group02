@@ -54,4 +54,13 @@
         <servlet-name>AdminApiServlet</servlet-name>
         <url-pattern>/api/v1/admin/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CvFileServlet</servlet-name>
+        <servlet-class>com.group02.tars.controller.api.CvFileServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CvFileServlet</servlet-name>
+        <url-pattern>/api/v1/files/cv/*</url-pattern>
+    </servlet-mapping>
 </web-app>

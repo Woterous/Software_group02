@@ -33,6 +33,13 @@
         }
     }
 
+    function cvFileUrl(cvPath) {
+        if (!cvPath) return "";
+        const fileName = String(cvPath).replace(/\\/g, "/").split("/").pop();
+        if (!fileName) return "";
+        return `${cfg.apiBasePath}/files/cv/${encodeURIComponent(fileName)}`;
+    }
+
     function fromMock(result, meta = null) {
         if (!result.ok) {
             return errEnvelope(result.error.code, result.error.message, result.error.details || []);
@@ -42,6 +49,7 @@
 
     window.ApiClient = {
         mode: cfg.dataSource,
+        cvFileUrl,
 
         async authLogin(payload) {
             if (this.mode === "mock") return fromMock(window.MockEngine.auth.login(payload));
