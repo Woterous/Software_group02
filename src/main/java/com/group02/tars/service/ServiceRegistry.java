@@ -2,6 +2,7 @@ package com.group02.tars.service;
 
 import com.group02.tars.service.impl.ApplicationServiceImpl;
 import com.group02.tars.service.impl.AdminServiceImpl;
+import com.group02.tars.service.impl.AiAssistantServiceImpl;
 import com.group02.tars.service.impl.CvAccessServiceImpl;
 import com.group02.tars.service.impl.JobServiceImpl;
 import com.group02.tars.service.impl.MoServiceImpl;
@@ -23,6 +24,7 @@ public class ServiceRegistry {
     private final MoService moService;
     private final AdminService adminService;
     private final CvAccessService cvAccessService;
+    private final AiAssistantService aiAssistantService;
 
     private ServiceRegistry(ServletContext context) throws IOException {
         this.storage = new JsonFileStorage(context);
@@ -32,6 +34,7 @@ public class ServiceRegistry {
         this.moService = new MoServiceImpl(storage);
         this.adminService = new AdminServiceImpl(storage);
         this.cvAccessService = new CvAccessServiceImpl(storage);
+        this.aiAssistantService = new AiAssistantServiceImpl(storage);
     }
 
     public static ServiceRegistry from(ServletContext context) throws IOException {
@@ -68,6 +71,10 @@ public class ServiceRegistry {
 
     public CvAccessService cvAccessService() {
         return cvAccessService;
+    }
+
+    public AiAssistantService aiAssistantService() {
+        return aiAssistantService;
     }
 
     public FileStorage storage() {

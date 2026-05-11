@@ -56,6 +56,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>AiApiServlet</servlet-name>
+        <servlet-class>com.group02.tars.controller.api.AiApiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AiApiServlet</servlet-name>
+        <url-pattern>/api/v1/ai/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>CvFileServlet</servlet-name>
         <servlet-class>com.group02.tars.controller.api.CvFileServlet</servlet-class>
     </servlet>
