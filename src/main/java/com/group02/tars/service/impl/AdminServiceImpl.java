@@ -88,10 +88,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<Map<String, Object>> listApplications(String status, String module, String keyword) throws IOException {
+    public List<Map<String, Object>> listApplications(String status, String module, String keyword, String jobId) throws IOException {
         String statusNorm = safe(status);
         String moduleNorm = safe(module);
         String keywordNorm = safe(keyword).toLowerCase(Locale.ROOT);
+        String jobIdNorm = safe(jobId);
         List<Application> applications = storage.loadApplications();
         Map<String, User> userById = storage.loadUsers().stream().collect(LinkedHashMap::new, (m, u) -> m.put(u.userId, u), Map::putAll);
         Map<String, Job> jobById = storage.loadJobs().stream().collect(LinkedHashMap::new, (m, j) -> m.put(j.jobId, j), Map::putAll);
@@ -104,6 +105,7 @@ public class AdminServiceImpl implements AdminService {
             String title = job == null ? "Unknown" : safe(job.title);
             String applicantName = user == null ? "Unknown" : safe(user.name);
 
+            if (!jobIdNorm.isBlank() && !jobIdNorm.equalsIgnoreCase(safe(app.jobId))) continue;
             if (!statusNorm.isBlank() && !statusNorm.equalsIgnoreCase(safe(app.status))) continue;
             if (!moduleNorm.isBlank() && !moduleNorm.equalsIgnoreCase(moduleName)) continue;
             String blob = (applicantName + " " + title).toLowerCase(Locale.ROOT);

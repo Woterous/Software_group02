@@ -11,7 +11,7 @@ public interface AdminService {
 
     PagedUsers listUsers(String role, String keyword, int page, int size) throws IOException;
 
-    List<Map<String, Object>> listApplications(String status, String module, String keyword) throws IOException;
+    List<Map<String, Object>> listApplications(String status, String module, String keyword, String jobId) throws IOException;
 
     List<Map<String, Object>> workload(String riskLevel) throws IOException;
 

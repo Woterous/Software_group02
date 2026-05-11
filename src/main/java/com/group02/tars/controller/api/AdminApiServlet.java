@@ -53,7 +53,8 @@ public class AdminApiServlet extends BaseApiServlet {
         List<Map<String, Object>> rows = adminService().listApplications(
             req.getParameter("status"),
             req.getParameter("module"),
-            req.getParameter("keyword")
+            req.getParameter("keyword"),
+            req.getParameter("jobId")
         );
 
         Map<String, Object> data = new LinkedHashMap<>();
