@@ -15,6 +15,24 @@ window.PageModules.admin = window.PageModules.admin || {};
         container.innerHTML = rows.map(mapper).join("");
     }
 
+    function renderStructuredAi(data, fallbackBody) {
+        const view = data?.modelView;
+        if (view && typeof window.UIKit.renderAiStructuredView === "function") {
+            return window.UIKit.renderAiStructuredView({
+                providerMode: data.provider?.mode || "tool-only",
+                headline: view.headline,
+                priority: view.priority,
+                sections: view.sections
+            });
+        }
+        return `
+            <div class="ai-provider-note">
+                <span>${window.UIKit.escapeHtml(data?.provider?.mode || "tool-only")}</span>
+                <p>${window.UIKit.escapeHtml(fallbackBody || data?.summary || "No risk summary generated.")}</p>
+            </div>
+        `;
+    }
+
     async function initDashboard() {
         const session = requireSession();
         if (!session) return;
@@ -181,10 +199,7 @@ window.PageModules.admin = window.PageModules.admin || {};
                 }
                 const data = result.data;
                 aiOutput.innerHTML = `
-                    <div class="ai-provider-note">
-                        <span>${window.UIKit.escapeHtml(data.provider?.mode || "tool-only")}</span>
-                        <p>${window.UIKit.escapeHtml(data.summary || "No risk summary generated.")}</p>
-                    </div>
+                    ${renderStructuredAi(data, data.summary)}
                     <div class="ai-grid-two">
                         <article class="ai-result-card">
                             <h4>People risk</h4>

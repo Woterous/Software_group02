@@ -29,6 +29,29 @@ window.PageModules.mo = window.PageModules.mo || {};
         });
     }
 
+    function renderStructuredAi(data, fallbackTitle, fallbackBody) {
+        const view = data?.modelView;
+        if (view && typeof window.UIKit.renderAiStructuredView === "function") {
+            return window.UIKit.renderAiStructuredView({
+                providerMode: data.provider?.mode || "tool-only",
+                headline: view.headline,
+                priority: view.priority,
+                sections: view.sections
+            });
+        }
+        return `
+            <article class="ai-result-card">
+                <div class="ai-result-head">
+                    <div>
+                        <span class="section-kicker">${window.UIKit.escapeHtml(data?.provider?.mode || "tool-only")}</span>
+                        <h4>${window.UIKit.escapeHtml(fallbackTitle || "AI summary")}</h4>
+                    </div>
+                </div>
+                <p>${window.UIKit.escapeHtml(fallbackBody || data?.summary || "No summary generated.")}</p>
+            </article>
+        `;
+    }
+
     async function initDashboard() {
         const session = requireSession();
         if (!session) return;
@@ -261,24 +284,18 @@ window.PageModules.mo = window.PageModules.mo || {};
                 const data = summaryResult.data;
                 const cv = data.cv || {};
                 aiOutput.innerHTML = `
-                    <article class="ai-result-card">
+                    ${renderStructuredAi(data, "Review brief", data.summary)}
+                    <article class="ai-result-card ai-result-card--quiet">
                         <div class="ai-result-head">
                             <div>
-                                <span class="section-kicker">${window.UIKit.escapeHtml(data.provider?.mode || "tool-only")}</span>
-                                <h4>Review brief</h4>
+                                <span class="section-kicker">Candidate data</span>
+                                <h4>Profile evidence</h4>
                             </div>
                             <span class="badge ${cv.uploaded ? "selected" : "pending"}">${cv.uploaded ? "cv available" : "cv missing"}</span>
                         </div>
-                        <p>${window.UIKit.escapeHtml(data.summary || "")}</p>
                         <div class="ai-chip-row">
-                            ${(data.matchedSkills || []).map((skill) => `<span class="skill-pill">${window.UIKit.escapeHtml(skill)}</span>`).join("")}
+                            ${(data.matchedSkills || []).map((skill) => `<span class="skill-pill">${window.UIKit.escapeHtml(skill)}</span>`).join("") || '<span class="muted">No matched skills recorded.</span>'}
                         </div>
-                    </article>
-                    <article class="ai-result-card ai-result-card--quiet">
-                        <strong>Questions to verify</strong>
-                        <ul class="ai-question-list">
-                            ${(data.reviewQuestions || []).map((question) => `<li>${window.UIKit.escapeHtml(question)}</li>`).join("")}
-                        </ul>
                     </article>
                 `;
             });

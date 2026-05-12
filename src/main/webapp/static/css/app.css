@@ -3650,6 +3650,58 @@ body.theme-soft .page-chip.active {
     line-height: 1.6;
 }
 
+body[data-role="ta"] .content-area .stat-card.stat-card--featured,
+body[data-role="mo"] .content-area .stat-card.stat-card--featured,
+body[data-role="admin"] .content-area .stat-card.stat-card--featured {
+    background:
+        linear-gradient(140deg, rgba(23, 78, 70, 0.98), rgba(31, 106, 94, 0.94)),
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 30%);
+    color: #eff7f3;
+    border-color: rgba(31, 106, 94, 0.72);
+    box-shadow: 0 26px 44px rgba(23, 78, 70, 0.2);
+}
+
+body[data-role="ta"] .content-area .stat-card.stat-card--featured .stat-eyebrow,
+body[data-role="ta"] .content-area .stat-card.stat-card--featured h3,
+body[data-role="ta"] .content-area .stat-card.stat-card--featured .stat-note,
+body[data-role="mo"] .content-area .stat-card.stat-card--featured .stat-eyebrow,
+body[data-role="mo"] .content-area .stat-card.stat-card--featured h3,
+body[data-role="mo"] .content-area .stat-card.stat-card--featured .stat-note,
+body[data-role="admin"] .content-area .stat-card.stat-card--featured .stat-eyebrow,
+body[data-role="admin"] .content-area .stat-card.stat-card--featured h3,
+body[data-role="admin"] .content-area .stat-card.stat-card--featured .stat-note {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+body[data-role="ta"] .content-area .stat-card.stat-card--featured p,
+body[data-role="mo"] .content-area .stat-card.stat-card--featured p,
+body[data-role="admin"] .content-area .stat-card.stat-card--featured p {
+    color: #ffffff;
+}
+
+#mo-ai-summary .ai-model-grid,
+#admin-ai-risk-output .ai-model-grid,
+.global-ai-message--structured .ai-model-grid {
+    grid-template-columns: 1fr;
+}
+
+.global-ai-message--structured {
+    max-width: 96%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.global-ai-message--structured .ai-model-summary {
+    box-shadow: none;
+}
+
+.global-ai-message--structured small {
+    display: block;
+    margin: 8px 4px 0;
+    color: var(--text-1);
+}
+
 @media (max-width: 1380px) {
     .topbar {
         grid-template-columns: minmax(0, 1fr) auto;

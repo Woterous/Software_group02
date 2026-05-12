@@ -160,24 +160,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         data.put("summary", deterministicSummary);
         data.put("deterministicSummary", deterministicSummary);
         data.put("reviewQuestions", buildReviewQuestions(match, cvFileName));
-        attachProviderAnalysis(
-            data,
-            "MO candidate review summary",
-            "Write a review brief for the module owner. Include candidate fit, CV availability, missing evidence, and interview/review questions.",
-            Map.of(
-                "candidate", candidate,
-                "job", jobData,
-                "cv", cv,
-                "matchedSkills", match.matched(),
-                "missingSkills", match.missing(),
-                "applicationStatus", application.status,
-                "reviewNote", ServiceSupport.normalize(application.reviewNote),
-                "localSummary", deterministicSummary,
-                "reviewQuestions", data.get("reviewQuestions")
-            ),
-            "summary",
-            1000
-        );
+        attachMoCandidateView(data, candidate, jobData, cv, application, match, deterministicSummary);
         return data;
     }
 
@@ -235,14 +218,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         String deterministicSummary = buildAdminSummary(people, roleSignals);
         data.put("summary", deterministicSummary);
         data.put("deterministicSummary", deterministicSummary);
-        attachProviderAnalysis(
-            data,
-            "Admin workload risk analysis",
-            "Analyze workload and recruitment risks for an administrator. Prioritize concrete risks and operational actions.",
-            Map.of("riskPeople", people, "roleSignals", roleSignals, "localSummary", deterministicSummary),
-            "summary",
-            1000
-        );
+        attachAdminRiskView(data, people, roleSignals, deterministicSummary);
         return data;
     }
 
@@ -279,13 +255,31 @@ public class AiAssistantServiceImpl implements AiAssistantService {
             Current role/page context:
             %s
 
-            Answer in a way that helps the user operate this exact TA recruitment system.
-            If the user asks for an action that should be done through a page, name the page and the next click.
+            Return this JSON shape exactly:
+            {
+              "headline": "short title",
+              "answer": "direct answer",
+              "keyPoints": ["important point"],
+              "nextActions": ["concrete next click or check"],
+              "warnings": ["risk or limitation, empty if none"]
+            }
+
+            Rules:
+            - Help the user operate this exact TA recruitment system.
+            - If the user asks for an action that should be done through a page, name the page and the next click.
+            - JSON only.
             """.formatted(normalizedMessage, toJson(context));
 
-        AiProviderResult result = provider.complete(SYSTEM_PROMPT, userPrompt, 1100);
+        AiProviderResult result = provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 1100);
         data.put("modelCalled", true);
-        data.put("answer", result.content());
+        try {
+            Map<String, Object> parsed = parseJsonObject(result.content());
+            Map<String, Object> answerView = normalizeChatView(parsed, normalizedMessage);
+            data.put("answerView", answerView);
+            data.put("answer", answerView.get("answer"));
+        } catch (Exception ignored) {
+            data.put("answer", result.content());
+        }
         data.put("model", result.model());
         data.put("finishReason", result.finishReason());
         data.put("usage", result.usage());
@@ -462,6 +456,321 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         normalized.put("risks", chooseStringList(raw.get("risks"), fallback.get("risks")));
         normalized.put("nextActions", chooseStringList(raw.get("nextActions"), fallback.get("nextActions")));
         return normalized;
+    }
+
+    private void attachMoCandidateView(
+        Map<String, Object> data,
+        Map<String, Object> candidate,
+        Map<String, Object> job,
+        Map<String, Object> cv,
+        Application application,
+        MatchResult match,
+        String deterministicSummary
+    ) {
+        Map<String, Object> fallback = buildLocalMoCandidateView(candidate, job, cv, application, match, deterministicSummary);
+        data.put("modelView", fallback);
+        data.put("modelCalled", false);
+
+        if (!provider.isReady()) {
+            data.put("modelUnavailableReason", "AI provider is not configured.");
+            return;
+        }
+
+        try {
+            String userPrompt = """
+                Task: MO candidate review summary.
+
+                Return this JSON shape exactly:
+                {
+                  "headline": "one concise review conclusion",
+                  "priority": {
+                    "label": "Review recommendation",
+                    "title": "short decision direction",
+                    "reason": "why this direction is appropriate",
+                    "meta": "status or risk tag"
+                  },
+                  "sections": [
+                    {"title": "Evidence", "tone": "strength", "items": ["evidence point"]},
+                    {"title": "Gaps", "tone": "risk", "items": ["missing evidence point"]},
+                    {"title": "Questions", "tone": "action", "items": ["question to verify"]}
+                  ]
+                }
+
+                Rules:
+                - Use only the provided candidate, job, CV, and application context.
+                - Keep each section to 2-4 items.
+                - Do not make a final hiring decision; recommend what the MO should verify next.
+                - JSON only.
+
+                Structured context:
+                %s
+                """.formatted(toJson(Map.of(
+                    "candidate", candidate,
+                    "job", job,
+                    "cv", cv,
+                    "matchedSkills", match.matched(),
+                    "missingSkills", match.missing(),
+                    "applicationStatus", application.status,
+                    "reviewNote", ServiceSupport.normalize(application.reviewNote),
+                    "localSummary", deterministicSummary,
+                    "reviewQuestions", data.get("reviewQuestions")
+                )));
+            AiProviderResult result = provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 1000);
+            Map<String, Object> parsed = parseJsonObject(result.content());
+            Map<String, Object> normalized = normalizeStructuredView(parsed, fallback);
+            data.put("modelCalled", true);
+            data.put("modelView", normalized);
+            data.put("modelAnalysis", mapper.writeValueAsString(normalized));
+            data.put("summary", normalized.get("headline"));
+            data.put("model", result.model());
+            data.put("finishReason", result.finishReason());
+            data.put("usage", result.usage());
+        } catch (Exception ex) {
+            data.put("modelCalled", false);
+            data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> buildLocalMoCandidateView(
+        Map<String, Object> candidate,
+        Map<String, Object> job,
+        Map<String, Object> cv,
+        Application application,
+        MatchResult match,
+        String deterministicSummary
+    ) {
+        String candidateName = asString(candidate.get("name"));
+        String jobTitle = asString(job.get("title"));
+        List<String> evidence = new ArrayList<>();
+        if (!match.matched().isEmpty()) {
+            evidence.add("Profile matches required skill(s): " + String.join(", ", match.matched()) + ".");
+        }
+        if (Boolean.TRUE.equals(cv.get("uploaded"))) {
+            evidence.add("A CV file is available for document-level review.");
+        }
+        if (!ServiceSupport.normalize(application.reviewNote).isBlank()) {
+            evidence.add("Existing review note: " + ServiceSupport.normalize(application.reviewNote));
+        }
+        if (evidence.isEmpty()) {
+            evidence.add("No strong evidence has been recorded yet.");
+        }
+
+        List<String> gaps = new ArrayList<>();
+        if (!match.missing().isEmpty()) {
+            gaps.add("Missing evidence for " + String.join(", ", match.missing()) + ".");
+        }
+        if (!Boolean.TRUE.equals(cv.get("uploaded"))) {
+            gaps.add("No CV file is available.");
+        }
+        if (gaps.isEmpty()) {
+            gaps.add("Confirm workload and teaching availability before recording a decision.");
+        }
+
+        return structuredView(
+            "Review " + candidateName + " against " + jobTitle + " using profile, CV, and skill evidence.",
+            Map.of(
+                "label", "Review recommendation",
+                "title", "Verify evidence before final decision",
+                "reason", deterministicSummary,
+                "meta", ServiceSupport.normalize(application.status)
+            ),
+            List.of(
+                section("Evidence", "strength", evidence),
+                section("Gaps", "risk", gaps),
+                section("Questions", "action", buildReviewQuestions(match, asString(cv.get("fileName"))))
+            )
+        );
+    }
+
+    private void attachAdminRiskView(
+        Map<String, Object> data,
+        List<Map<String, Object>> people,
+        List<Map<String, Object>> roleSignals,
+        String deterministicSummary
+    ) {
+        Map<String, Object> fallback = buildLocalAdminRiskView(people, roleSignals, deterministicSummary);
+        data.put("modelView", fallback);
+        data.put("modelCalled", false);
+
+        if (!provider.isReady()) {
+            data.put("modelUnavailableReason", "AI provider is not configured.");
+            return;
+        }
+
+        try {
+            String userPrompt = """
+                Task: Admin workload and recruitment risk analysis.
+
+                Return this JSON shape exactly:
+                {
+                  "headline": "one concise operational risk summary",
+                  "priority": {
+                    "label": "Priority action",
+                    "title": "most important action",
+                    "reason": "why it matters",
+                    "meta": "risk tag"
+                  },
+                  "sections": [
+                    {"title": "People risks", "tone": "risk", "items": ["risk point"]},
+                    {"title": "Role signals", "tone": "strength", "items": ["role signal"]},
+                    {"title": "Admin actions", "tone": "action", "items": ["action point"]}
+                  ]
+                }
+
+                Rules:
+                - Use only the provided riskPeople and roleSignals.
+                - Prioritize operationally urgent items.
+                - Keep each section to 2-4 items.
+                - JSON only.
+
+                Structured context:
+                %s
+                """.formatted(toJson(Map.of(
+                    "riskPeople", people,
+                    "roleSignals", roleSignals,
+                    "localSummary", deterministicSummary
+                )));
+            AiProviderResult result = provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 1000);
+            Map<String, Object> parsed = parseJsonObject(result.content());
+            Map<String, Object> normalized = normalizeStructuredView(parsed, fallback);
+            data.put("modelCalled", true);
+            data.put("modelView", normalized);
+            data.put("modelAnalysis", mapper.writeValueAsString(normalized));
+            data.put("summary", normalized.get("headline"));
+            data.put("model", result.model());
+            data.put("finishReason", result.finishReason());
+            data.put("usage", result.usage());
+        } catch (Exception ex) {
+            data.put("modelCalled", false);
+            data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> buildLocalAdminRiskView(
+        List<Map<String, Object>> people,
+        List<Map<String, Object>> roleSignals,
+        String deterministicSummary
+    ) {
+        List<String> peopleItems = people.stream()
+            .limit(4)
+            .map(row -> asString(row.get("name")) + " has " + asString(row.get("totalHours")) + " hrs/week marked as " + asString(row.get("riskLevel")) + ".")
+            .toList();
+        List<String> roleItems = roleSignals.stream()
+            .limit(4)
+            .map(row -> asString(row.get("moduleName")) + ": " + asString(row.get("reason")))
+            .toList();
+        List<String> actions = new ArrayList<>();
+        if (!people.isEmpty()) {
+            actions.add("Review high-hour TA assignments before confirming more selections.");
+        }
+        if (!roleSignals.isEmpty()) {
+            actions.add("Check open roles with coverage or deadline risk.");
+        }
+        if (actions.isEmpty()) {
+            actions.add("Keep monitoring workload after each selection decision.");
+        }
+
+        return structuredView(
+            deterministicSummary,
+            Map.of(
+                "label", "Priority action",
+                "title", people.isEmpty() && roleSignals.isEmpty() ? "Continue monitoring" : "Review risk items first",
+                "reason", people.isEmpty() && roleSignals.isEmpty()
+                    ? "No immediate workload or role-level risk is visible under the current filter."
+                    : "Workload and coverage issues can affect final allocation quality.",
+                "meta", people.isEmpty() && roleSignals.isEmpty() ? "normal" : "risk"
+            ),
+            List.of(
+                section("People risks", "risk", peopleItems.isEmpty() ? List.of("No people risk under the selected filter.") : peopleItems),
+                section("Role signals", "strength", roleItems.isEmpty() ? List.of("No role-level risk signal detected.") : roleItems),
+                section("Admin actions", "action", actions)
+            )
+        );
+    }
+
+    private Map<String, Object> normalizeChatView(Map<String, Object> raw, String userMessage) {
+        String answer = firstNonBlank(asString(raw.get("answer")), "No answer returned.");
+        Map<String, Object> fallback = structuredView(
+            firstNonBlank(asString(raw.get("headline")), "Assistant response"),
+            Map.of(
+                "label", "Answer",
+                "title", "Direct response",
+                "reason", answer,
+                "meta", "assistant"
+            ),
+            List.of(
+                section("Key points", "strength", chooseStringList(raw.get("keyPoints"), List.of("Request: " + userMessage))),
+                section("Next actions", "action", chooseStringList(raw.get("nextActions"), List.of("Review the relevant page and confirm the action."))),
+                section("Warnings", "risk", chooseStringList(raw.get("warnings"), List.of()))
+            )
+        );
+        fallback.put("answer", answer);
+        return normalizeStructuredView(fallback, fallback);
+    }
+
+    private Map<String, Object> normalizeStructuredView(Map<String, Object> raw, Map<String, Object> fallback) {
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        normalized.put("headline", firstNonBlank(asString(raw.get("headline")), asString(fallback.get("headline"))));
+        normalized.put("priority", normalizePriority(raw.get("priority"), fallback.get("priority")));
+        normalized.put("sections", normalizeSections(raw.get("sections"), fallback.get("sections")));
+        if (!asString(raw.get("answer")).isBlank()) {
+            normalized.put("answer", asString(raw.get("answer")));
+        } else if (!asString(fallback.get("answer")).isBlank()) {
+            normalized.put("answer", asString(fallback.get("answer")));
+        }
+        return normalized;
+    }
+
+    private Map<String, Object> normalizePriority(Object rawValue, Object fallbackValue) {
+        Map<String, Object> raw = asObjectMap(rawValue);
+        Map<String, Object> fallback = asObjectMap(fallbackValue);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("label", firstNonBlank(asString(raw.get("label")), asString(fallback.get("label")), "Priority"));
+        result.put("title", firstNonBlank(asString(raw.get("title")), asString(fallback.get("title")), ""));
+        result.put("reason", firstNonBlank(asString(raw.get("reason")), asString(fallback.get("reason")), ""));
+        result.put("meta", firstNonBlank(asString(raw.get("meta")), asString(fallback.get("meta")), ""));
+        return result;
+    }
+
+    private List<Map<String, Object>> normalizeSections(Object rawValue, Object fallbackValue) {
+        List<Map<String, Object>> raw = asSectionList(rawValue);
+        if (!raw.isEmpty()) {
+            return raw;
+        }
+        return asSectionList(fallbackValue);
+    }
+
+    private List<Map<String, Object>> asSectionList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return List.of();
+        }
+        List<Map<String, Object>> sections = new ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> raw = asObjectMap(item);
+            String title = firstNonBlank(asString(raw.get("title")), "Details");
+            String tone = firstNonBlank(asString(raw.get("tone")), "action");
+            List<String> items = asStringList(raw.get("items"));
+            if (!items.isEmpty()) {
+                sections.add(section(title, tone, items.stream().limit(4).toList()));
+            }
+        }
+        return sections;
+    }
+
+    private Map<String, Object> structuredView(String headline, Map<?, ?> priority, List<Map<String, Object>> sections) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("headline", headline);
+        view.put("priority", asObjectMap(priority));
+        view.put("sections", sections);
+        return view;
+    }
+
+    private Map<String, Object> section(String title, String tone, List<String> items) {
+        Map<String, Object> section = new LinkedHashMap<>();
+        section.put("title", title);
+        section.put("tone", tone);
+        section.put("items", items == null ? List.of() : items);
+        return section;
     }
 
     private Map<String, Object> parseJsonObject(String content) throws IOException {

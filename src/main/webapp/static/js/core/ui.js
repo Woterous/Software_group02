@@ -261,6 +261,51 @@
         return `<span class="badge ${safe}">${escapeHtml(status || "-")}</span>`;
     }
 
+    function normalizeTextList(value) {
+        return Array.isArray(value)
+            ? value.map((item) => String(item || "").trim()).filter(Boolean)
+            : [];
+    }
+
+    function renderAiSection(title, items, tone = "action") {
+        const rows = normalizeTextList(items);
+        if (!rows.length) return "";
+        return `
+            <div class="ai-model-list ai-model-list--${escapeHtml(tone)}">
+                <strong>${escapeHtml(title)}</strong>
+                <ul>
+                    ${rows.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ul>
+            </div>
+        `;
+    }
+
+    function renderAiStructuredView({ providerMode, headline, priority, sections }) {
+        const priorityData = priority || {};
+        const sectionRows = Array.isArray(sections) ? sections : [];
+        return `
+            <article class="ai-model-summary">
+                <div class="ai-model-summary-head">
+                    ${providerMode ? `<span>${escapeHtml(providerMode)}</span>` : ""}
+                    <strong>${escapeHtml(headline || "AI analysis is ready.")}</strong>
+                </div>
+                ${priorityData.title || priorityData.reason ? `
+                    <div class="ai-model-priority">
+                        <div>
+                            <span class="section-kicker">${escapeHtml(priorityData.label || "Priority")}</span>
+                            <h4>${escapeHtml(priorityData.title || "Review recommendation")}</h4>
+                            <p>${escapeHtml(priorityData.reason || "")}</p>
+                        </div>
+                        ${priorityData.meta ? `<span class="module-tag">${escapeHtml(priorityData.meta)}</span>` : ""}
+                    </div>
+                ` : ""}
+                <div class="ai-model-grid">
+                    ${sectionRows.map((section) => renderAiSection(section.title, section.items, section.tone)).join("")}
+                </div>
+            </article>
+        `;
+    }
+
     function formatDate(date) {
         return date || "-";
     }
@@ -434,6 +479,7 @@
         bindGlobalActions,
         ensureSessionOrRedirect,
         escapeHtml,
-        refreshSelectComponents
+        refreshSelectComponents,
+        renderAiStructuredView
     };
 })();

@@ -46,6 +46,13 @@
             return errEnvelope("CV_FILE_MISSING", "No CV file is available.");
         }
 
+        const previewWindow = window.open("about:blank", "_blank");
+        if (!previewWindow) {
+            return errEnvelope("CV_POPUP_BLOCKED", "The browser blocked the CV preview window.");
+        }
+        previewWindow.opener = null;
+        previewWindow.document.write("<!doctype html><title>Opening CV</title><body style=\"font-family: sans-serif; padding: 24px;\">Opening CV...</body>");
+
         const res = await fetch(url, {
             credentials: "include",
             method: "GET"
@@ -59,16 +66,13 @@
             } catch (_) {
                 // Non-JSON error bodies are still handled by the generic message.
             }
+            previewWindow.document.body.innerHTML = `<p style="font-family: sans-serif; color: #8a1f27;">${message}</p>`;
             return errEnvelope(`HTTP_${res.status}`, message);
         }
 
         const blob = await res.blob();
         const objectUrl = URL.createObjectURL(blob);
-        const opened = window.open(objectUrl, "_blank", "noopener");
-        if (!opened) {
-            URL.revokeObjectURL(objectUrl);
-            return errEnvelope("CV_POPUP_BLOCKED", "The browser blocked the CV preview window.");
-        }
+        previewWindow.location.href = objectUrl;
         setTimeout(() => URL.revokeObjectURL(objectUrl), 60 * 1000);
         return okEnvelope({ opened: true });
     }

@@ -12,6 +12,27 @@
         return node;
     }
 
+    function appendStructuredMessage(root, data, meta) {
+        if (!root || !data?.answerView || typeof window.UIKit.renderAiStructuredView !== "function") {
+            return appendMessage(root, "assistant", data?.answer || "No answer returned.", meta);
+        }
+        const view = data.answerView;
+        const node = document.createElement("div");
+        node.className = "global-ai-message assistant global-ai-message--structured";
+        node.innerHTML = `
+            ${window.UIKit.renderAiStructuredView({
+                providerMode: data.modelCalled ? data.model || "model" : "local fallback",
+                headline: view.headline,
+                priority: view.priority,
+                sections: view.sections
+            })}
+            ${meta ? `<small>${window.UIKit.escapeHtml(meta)}</small>` : ""}
+        `;
+        root.appendChild(node);
+        root.scrollTop = root.scrollHeight;
+        return node;
+    }
+
     async function refreshStatus(statusEl) {
         if (!statusEl) return;
         const result = await window.ApiClient.aiStatus();
@@ -76,12 +97,7 @@
             }
 
             const data = result.data || {};
-            appendMessage(
-                messages,
-                "assistant",
-                data.answer || "No answer returned.",
-                data.modelCalled ? `Model: ${data.model || "configured model"}` : "Local fallback"
-            );
+            appendStructuredMessage(messages, data, data.modelCalled ? `Model: ${data.model || "configured model"}` : "Local fallback");
         });
     }
 
