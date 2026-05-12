@@ -15,6 +15,20 @@ window.PageModules.mo = window.PageModules.mo || {};
         container.innerHTML = rows.map(renderItem).join("");
     }
 
+    function bindCvPreviewButtons(scope) {
+        if (!scope) return;
+        scope.querySelectorAll("[data-cv-path]").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+                btn.disabled = true;
+                const result = await window.ApiClient.openCvFile(btn.dataset.cvPath);
+                btn.disabled = false;
+                if (!result.success) {
+                    window.UIKit.toast(result.error.message, "error");
+                }
+            });
+        });
+    }
+
     async function initDashboard() {
         const session = requireSession();
         if (!session) return;
@@ -71,8 +85,10 @@ window.PageModules.mo = window.PageModules.mo || {};
                     <td>${window.UIKit.badge(job.status)}</td>
                     <td>${window.UIKit.escapeHtml(job.applicantCount)}</td>
                     <td>
-                        <button class="ghost-btn" type="button" data-edit="${window.UIKit.escapeHtml(job.jobId)}">Edit</button>
-                        <a class="ghost-btn inline" href="${window.APP_CONTEXT}/pages/mo/applicants?jobId=${window.UIKit.escapeHtml(job.jobId)}">Applicants</a>
+                        <div class="table-action-group">
+                            <button class="ghost-btn table-action-btn" type="button" data-edit="${window.UIKit.escapeHtml(job.jobId)}">Edit</button>
+                            <a class="ghost-btn inline table-action-btn" href="${window.APP_CONTEXT}/pages/mo/applicants?jobId=${window.UIKit.escapeHtml(job.jobId)}">Applicants</a>
+                        </div>
                     </td>
                 </tr>
             `).join("");
@@ -172,12 +188,13 @@ window.PageModules.mo = window.PageModules.mo || {};
                     <td>${window.UIKit.escapeHtml(row.applicantSkills)}</td>
                     <td>${window.UIKit.badge(row.status)}</td>
                     <td>
-                        ${cvUrl ? `<a class="glass-secondary-btn inline table-action-btn" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : '<span class="muted">Not uploaded</span>'}
+                        ${cvUrl ? `<button class="glass-secondary-btn inline table-action-btn" type="button" data-cv-path="${window.UIKit.escapeHtml(row.cvPath)}">View CV</button>` : '<span class="muted">Not uploaded</span>'}
                     </td>
                     <td><a class="ghost-btn inline" href="${window.APP_CONTEXT}/pages/mo/review?appId=${window.UIKit.escapeHtml(row.applicationId)}">Review</a></td>
                 </tr>
             `;
             }).join("");
+            bindCvPreviewButtons(table);
         };
 
         form.addEventListener("submit", (event) => {
@@ -216,9 +233,10 @@ window.PageModules.mo = window.PageModules.mo || {};
                     <span class="section-kicker">Candidate document</span>
                     <p class="muted">${app.cvPath ? window.UIKit.escapeHtml(app.cvPath) : "No CV has been uploaded by this applicant."}</p>
                 </div>
-                ${cvUrl ? `<a class="glass-secondary-btn inline" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : '<span class="muted">Not uploaded</span>'}
+                ${cvUrl ? `<button class="glass-secondary-btn inline" type="button" data-cv-path="${window.UIKit.escapeHtml(app.cvPath)}">View CV</button>` : '<span class="muted">Not uploaded</span>'}
             </div>
         `;
+        bindCvPreviewButtons(document.getElementById("mo-review-candidate"));
 
         const skills = (app.applicantSkills || []).map((skill) => `<div class="stack-item">${window.UIKit.escapeHtml(skill)}</div>`).join("");
         document.getElementById("mo-skill-match").innerHTML = `

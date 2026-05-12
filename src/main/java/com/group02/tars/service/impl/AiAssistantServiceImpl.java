@@ -1,5 +1,6 @@
 package com.group02.tars.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group02.tars.entity.Application;
 import com.group02.tars.entity.Job;
@@ -30,6 +31,11 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         Use only the provided JSON context. Do not invent users, jobs, decisions, files, or policies.
         Be concise, practical, and decision-oriented. If evidence is missing, say what needs to be checked.
         Return plain English that can be displayed directly in the web UI.
+        """;
+    private static final String JSON_SYSTEM_PROMPT = """
+        You are the embedded AI assistant for a teaching assistant recruitment system.
+        Use only the provided JSON context. Do not invent users, jobs, decisions, files, or policies.
+        Return exactly one valid JSON object. Do not wrap it in markdown. Do not add prose outside JSON.
         """;
 
     private final FileStorage storage;
@@ -101,16 +107,10 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         student.put("name", ta.name);
         student.put("skills", ta.skills == null ? List.of() : ta.skills);
         data.put("student", student);
-        data.put("recommendations", rows.stream().limit(5).toList());
+        List<Map<String, Object>> recommendations = rows.stream().limit(5).toList();
+        data.put("recommendations", recommendations);
         data.put("guidance", "Review the highest-score jobs first, then confirm deadline and workload fit before applying.");
-        attachProviderAnalysis(
-            data,
-            "TA job recommendation",
-            "Explain which roles the TA should prioritize. Mention strongest fits, risks, missing evidence, and next action.",
-            Map.of("student", student, "recommendations", data.get("recommendations"), "localGuidance", data.get("guidance")),
-            "modelAnalysis",
-            900
-        );
+        attachTaRecommendationView(data, student, recommendations);
         return data;
     }
 
@@ -326,6 +326,195 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         } catch (Exception ex) {
             data.put("modelCalled", false);
             data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private void attachTaRecommendationView(
+        Map<String, Object> data,
+        Map<String, Object> student,
+        List<Map<String, Object>> recommendations
+    ) {
+        Map<String, Object> fallback = buildLocalTaRecommendationView(student, recommendations);
+        data.put("modelView", fallback);
+        data.put("modelCalled", false);
+
+        if (!provider.isReady()) {
+            data.put("modelUnavailableReason", "AI provider is not configured.");
+            return;
+        }
+
+        try {
+            String userPrompt = """
+                Task: TA job recommendation.
+
+                Return this JSON shape exactly:
+                {
+                  "headline": "one concise sentence",
+                  "priority": {
+                    "jobId": "JOB001",
+                    "title": "role title",
+                    "reason": "why this role should be prioritized"
+                  },
+                  "strengths": ["short evidence point"],
+                  "risks": ["short risk or missing evidence point"],
+                  "nextActions": ["concrete action the TA should take"]
+                }
+
+                Rules:
+                - Use only jobs that appear in recommendations.
+                - Keep every array to 2-4 items.
+                - If no recommendation is strong, say that in headline and nextActions.
+                - JSON only.
+
+                Structured context:
+                %s
+                """.formatted(toJson(Map.of(
+                    "student", student,
+                    "recommendations", recommendations,
+                    "localGuidance", data.get("guidance")
+                )));
+            AiProviderResult result = provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 900);
+            Map<String, Object> parsed = parseJsonObject(result.content());
+            Map<String, Object> normalized = normalizeTaRecommendationView(parsed, fallback);
+            data.put("modelCalled", true);
+            data.put("modelView", normalized);
+            data.put("modelAnalysis", mapper.writeValueAsString(normalized));
+            data.put("model", result.model());
+            data.put("finishReason", result.finishReason());
+            data.put("usage", result.usage());
+        } catch (Exception ex) {
+            data.put("modelCalled", false);
+            data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> buildLocalTaRecommendationView(
+        Map<String, Object> student,
+        List<Map<String, Object>> recommendations
+    ) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        String name = ServiceSupport.normalize(String.valueOf(student.getOrDefault("name", "this student")));
+        Map<String, Object> top = recommendations.isEmpty() ? Map.of() : recommendations.get(0);
+        String topTitle = ServiceSupport.normalize(String.valueOf(top.getOrDefault("title", "")));
+        String topJobId = ServiceSupport.normalize(String.valueOf(top.getOrDefault("jobId", "")));
+
+        view.put("headline", recommendations.isEmpty()
+            ? "No active recommendation can be made from the current data."
+            : "Prioritize " + topTitle + " first for " + name + ".");
+
+        Map<String, Object> priority = new LinkedHashMap<>();
+        priority.put("jobId", topJobId);
+        priority.put("title", topTitle.isBlank() ? "No priority role" : topTitle);
+        priority.put("reason", ServiceSupport.normalize(String.valueOf(top.getOrDefault(
+            "rationale",
+            "This role has the strongest current match score."
+        ))));
+        view.put("priority", priority);
+
+        List<String> strengths = new ArrayList<>();
+        List<String> risks = new ArrayList<>();
+        for (Map<String, Object> row : recommendations) {
+            String title = ServiceSupport.normalize(String.valueOf(row.getOrDefault("title", "Role")));
+            int score = parseInt(row.get("score"), 0);
+            strengths.add(title + " has a " + score + "% profile match.");
+            List<String> missing = asStringList(row.get("missingSkills"));
+            if (!missing.isEmpty()) {
+                risks.add(title + " still needs evidence for " + String.join(", ", missing) + ".");
+            }
+            if (Boolean.TRUE.equals(row.get("alreadyApplied"))) {
+                risks.add(title + " already has an application on record.");
+            }
+            if (strengths.size() >= 3 && risks.size() >= 3) {
+                break;
+            }
+        }
+        if (strengths.isEmpty()) {
+            strengths.add("No open role has enough evidence for a strong match yet.");
+        }
+        if (risks.isEmpty()) {
+            risks.add("Confirm deadline, workload, and module fit before applying.");
+        }
+        view.put("strengths", strengths.stream().limit(3).toList());
+        view.put("risks", risks.stream().limit(3).toList());
+        view.put("nextActions", recommendations.isEmpty()
+            ? List.of("Refresh the profile skills and check again when new jobs are posted.")
+            : List.of(
+                "Open the priority role detail page.",
+                "Confirm the CV supports the matched skills.",
+                "Apply only after checking deadline and workload."
+            ));
+        return view;
+    }
+
+    private Map<String, Object> normalizeTaRecommendationView(Map<String, Object> raw, Map<String, Object> fallback) {
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        normalized.put("headline", firstNonBlank(asString(raw.get("headline")), asString(fallback.get("headline"))));
+
+        Map<String, Object> rawPriority = asObjectMap(raw.get("priority"));
+        Map<String, Object> fallbackPriority = asObjectMap(fallback.get("priority"));
+        Map<String, Object> priority = new LinkedHashMap<>();
+        priority.put("jobId", firstNonBlank(asString(rawPriority.get("jobId")), asString(fallbackPriority.get("jobId"))));
+        priority.put("title", firstNonBlank(asString(rawPriority.get("title")), asString(fallbackPriority.get("title"))));
+        priority.put("reason", firstNonBlank(asString(rawPriority.get("reason")), asString(fallbackPriority.get("reason"))));
+        normalized.put("priority", priority);
+
+        normalized.put("strengths", chooseStringList(raw.get("strengths"), fallback.get("strengths")));
+        normalized.put("risks", chooseStringList(raw.get("risks"), fallback.get("risks")));
+        normalized.put("nextActions", chooseStringList(raw.get("nextActions"), fallback.get("nextActions")));
+        return normalized;
+    }
+
+    private Map<String, Object> parseJsonObject(String content) throws IOException {
+        String normalized = ServiceSupport.normalize(content);
+        if (normalized.startsWith("```")) {
+            normalized = normalized.replaceFirst("^```[a-zA-Z]*\\s*", "");
+            normalized = normalized.replaceFirst("\\s*```$", "");
+        }
+        int start = normalized.indexOf('{');
+        int end = normalized.lastIndexOf('}');
+        if (start < 0 || end <= start) {
+            throw new IOException("AI provider did not return a JSON object.");
+        }
+        return mapper.readValue(normalized.substring(start, end + 1), new TypeReference<LinkedHashMap<String, Object>>() {});
+    }
+
+    private Map<String, Object> asObjectMap(Object value) {
+        if (value instanceof Map<?, ?> raw) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            raw.forEach((key, item) -> result.put(String.valueOf(key), item));
+            return result;
+        }
+        return Map.of();
+    }
+
+    private List<String> chooseStringList(Object preferred, Object fallback) {
+        List<String> selected = asStringList(preferred);
+        if (!selected.isEmpty()) {
+            return selected.stream().limit(4).toList();
+        }
+        return asStringList(fallback).stream().limit(4).toList();
+    }
+
+    private List<String> asStringList(Object value) {
+        if (value instanceof List<?> list) {
+            return list.stream()
+                .map(this::asString)
+                .filter(item -> !item.isBlank())
+                .toList();
+        }
+        String single = asString(value);
+        return single.isBlank() ? List.of() : List.of(single);
+    }
+
+    private String asString(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private int parseInt(Object value, int fallback) {
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (Exception ignored) {
+            return fallback;
         }
     }
 

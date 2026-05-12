@@ -18,6 +18,29 @@
         if (trigger) trigger.setAttribute("aria-expanded", "false");
     }
 
+    function positionCustomSelectPanel(root) {
+        if (!root) return;
+        const trigger = root.querySelector(".glass-select-trigger");
+        const panel = root.querySelector(".glass-select-panel");
+        if (!trigger || !panel) return;
+
+        const triggerRect = trigger.getBoundingClientRect();
+        const viewportGap = 12;
+        const panelGap = 8;
+        const preferredMaxHeight = 260;
+        const belowSpace = window.innerHeight - triggerRect.bottom - viewportGap;
+        const aboveSpace = triggerRect.top - viewportGap;
+        const openUp = belowSpace < 170 && aboveSpace > belowSpace;
+        const availableHeight = Math.max(120, Math.min(preferredMaxHeight, openUp ? aboveSpace - panelGap : belowSpace - panelGap));
+
+        panel.style.left = `${triggerRect.left}px`;
+        panel.style.width = `${triggerRect.width}px`;
+        panel.style.maxHeight = `${availableHeight}px`;
+        panel.style.top = openUp ? "auto" : `${triggerRect.bottom + panelGap}px`;
+        panel.style.bottom = openUp ? `${window.innerHeight - triggerRect.top + panelGap}px` : "auto";
+        panel.dataset.placement = openUp ? "top" : "bottom";
+    }
+
     function closeAllCustomSelects(except) {
         document.querySelectorAll(".glass-select.is-open").forEach((root) => {
             if (except && root === except) return;
@@ -73,6 +96,9 @@
 
         updateSelectLabel(selectEl, trigger);
         trigger.disabled = !!selectEl.disabled;
+        if (root.classList.contains("is-open")) {
+            positionCustomSelectPanel(root);
+        }
     }
 
     function buildCustomSelect(selectEl) {
@@ -115,6 +141,7 @@
             if (willOpen) {
                 root.classList.add("is-open");
                 trigger.setAttribute("aria-expanded", "true");
+                positionCustomSelectPanel(root);
             } else {
                 closeCustomSelect(root);
             }
@@ -127,6 +154,7 @@
                     closeAllCustomSelects(root);
                     root.classList.add("is-open");
                     trigger.setAttribute("aria-expanded", "true");
+                    positionCustomSelectPanel(root);
                 }
                 const active = panel.querySelector(".glass-select-option.active") || panel.querySelector(".glass-select-option");
                 active?.focus();

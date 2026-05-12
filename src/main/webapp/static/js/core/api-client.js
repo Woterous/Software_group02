@@ -40,6 +40,39 @@
         return `${cfg.apiBasePath}/files/cv/${encodeURIComponent(fileName)}`;
     }
 
+    async function openCvFile(cvPath) {
+        const url = cvFileUrl(cvPath);
+        if (!url) {
+            return errEnvelope("CV_FILE_MISSING", "No CV file is available.");
+        }
+
+        const res = await fetch(url, {
+            credentials: "include",
+            method: "GET"
+        });
+        if (!res.ok) {
+            const raw = await res.text();
+            let message = `CV file could not be opened. Server returned ${res.status}.`;
+            try {
+                const parsed = JSON.parse(raw);
+                message = parsed?.error?.message || message;
+            } catch (_) {
+                // Non-JSON error bodies are still handled by the generic message.
+            }
+            return errEnvelope(`HTTP_${res.status}`, message);
+        }
+
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const opened = window.open(objectUrl, "_blank", "noopener");
+        if (!opened) {
+            URL.revokeObjectURL(objectUrl);
+            return errEnvelope("CV_POPUP_BLOCKED", "The browser blocked the CV preview window.");
+        }
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60 * 1000);
+        return okEnvelope({ opened: true });
+    }
+
     function fromMock(result, meta = null) {
         if (!result.ok) {
             return errEnvelope(result.error.code, result.error.message, result.error.details || []);
@@ -50,6 +83,7 @@
     window.ApiClient = {
         mode: cfg.dataSource,
         cvFileUrl,
+        openCvFile,
 
         async authLogin(payload) {
             if (this.mode === "mock") return fromMock(window.MockEngine.auth.login(payload));

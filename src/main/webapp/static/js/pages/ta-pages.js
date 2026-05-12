@@ -282,8 +282,19 @@ window.PageModules.ta = window.PageModules.ta || {};
                 <strong>${hasCv ? "Current CV uploaded and ready for review" : "Upload a CV to complete your application profile"}</strong>
                 <p>${window.UIKit.escapeHtml(hasCv ? cvFileName : "Module owners expect a current academic CV before reviewing your suitability.")}</p>
                 <span class="cv-status-meta">${window.UIKit.escapeHtml(hasCv ? profile.cvPath : "Accepted formats: PDF, DOC, DOCX up to 5MB")}</span>
-                ${hasCv && cvUrl ? `<a class="glass-secondary-btn inline cv-view-link" href="${cvUrl}" target="_blank" rel="noopener">View CV</a>` : ""}
+                ${hasCv && cvUrl ? `<button class="glass-secondary-btn inline cv-view-link" type="button" data-cv-path="${window.UIKit.escapeHtml(profile.cvPath)}">View CV</button>` : ""}
             `;
+            const viewCvBtn = cvCurrent.querySelector("[data-cv-path]");
+            if (viewCvBtn) {
+                viewCvBtn.addEventListener("click", async () => {
+                    viewCvBtn.disabled = true;
+                    const openResult = await window.ApiClient.openCvFile(viewCvBtn.dataset.cvPath);
+                    viewCvBtn.disabled = false;
+                    if (!openResult.success) {
+                        window.UIKit.toast(openResult.error.message, "error");
+                    }
+                });
+            }
             cvCurrent.classList.toggle("is-empty", !hasCv);
         };
 
@@ -398,6 +409,47 @@ window.PageModules.ta = window.PageModules.ta || {};
         const modules = window.ApiClient.lookups.modules();
         window.UIKit.setSelectOptions(form.module, modules, "value", "label", true, "All Modules");
 
+        const normalizeTextList = (value) => Array.isArray(value)
+            ? value.map((item) => String(item || "").trim()).filter(Boolean)
+            : [];
+
+        const renderAiList = (title, items, tone) => `
+            <div class="ai-model-list ai-model-list--${tone}">
+                <strong>${window.UIKit.escapeHtml(title)}</strong>
+                <ul>
+                    ${items.map((item) => `<li>${window.UIKit.escapeHtml(item)}</li>`).join("")}
+                </ul>
+            </div>
+        `;
+
+        const renderModelView = (modelView, provider) => {
+            const priority = modelView?.priority || {};
+            const strengths = normalizeTextList(modelView?.strengths);
+            const risks = normalizeTextList(modelView?.risks);
+            const nextActions = normalizeTextList(modelView?.nextActions);
+            return `
+                <article class="ai-model-summary">
+                    <div class="ai-model-summary-head">
+                        <span>${window.UIKit.escapeHtml(provider.mode || "tool-only")}</span>
+                        <strong>${window.UIKit.escapeHtml(modelView?.headline || "Profile match analysis is ready.")}</strong>
+                    </div>
+                    <div class="ai-model-priority">
+                        <div>
+                            <span class="section-kicker">Priority role</span>
+                            <h4>${window.UIKit.escapeHtml(priority.title || "Review top match")}</h4>
+                            <p>${window.UIKit.escapeHtml(priority.reason || "Open the highest ranked role and confirm evidence before applying.")}</p>
+                        </div>
+                        ${priority.jobId ? `<span class="module-tag">${window.UIKit.escapeHtml(priority.jobId)}</span>` : ""}
+                    </div>
+                    <div class="ai-model-grid">
+                        ${renderAiList("Strengths", strengths.length ? strengths : ["Matched skills and role data were reviewed."], "strength")}
+                        ${renderAiList("Risks", risks.length ? risks : ["Confirm missing evidence before applying."], "risk")}
+                        ${renderAiList("Next actions", nextActions.length ? nextActions : ["Open the role detail page and review the deadline."], "action")}
+                    </div>
+                </article>
+            `;
+        };
+
         const renderAiRecommendations = (data) => {
             const rows = data.recommendations || [];
             if (!aiOutput) return;
@@ -408,10 +460,9 @@ window.PageModules.ta = window.PageModules.ta || {};
             const provider = data.provider || {};
             const assistantText = data.modelAnalysis || data.guidance || provider.message || "Review the generated matches before applying.";
             aiOutput.innerHTML = `
-                <div class="ai-provider-note">
-                    <span>${window.UIKit.escapeHtml(provider.mode || "tool-only")}</span>
-                    <p>${window.UIKit.escapeHtml(assistantText)}</p>
-                </div>
+                ${data.modelView
+                    ? renderModelView(data.modelView, provider)
+                    : `<div class="ai-provider-note"><span>${window.UIKit.escapeHtml(provider.mode || "tool-only")}</span><p>${window.UIKit.escapeHtml(assistantText)}</p></div>`}
                 ${rows.map((row) => `
                     <article class="ai-result-card">
                         <div class="ai-result-head">
