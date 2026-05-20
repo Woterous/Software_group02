@@ -5,8 +5,13 @@ import com.group02.tars.entity.User;
 import com.group02.tars.service.ServiceException;
 import com.group02.tars.support.InMemoryFileStorage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.group02.tars.support.TestDataFactory.application;
@@ -14,9 +19,13 @@ import static com.group02.tars.support.TestDataFactory.job;
 import static com.group02.tars.support.TestDataFactory.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AiAssistantServiceImplTest {
+
+    @TempDir
+    Path tempDir;
 
     @Test
     void recommendJobsForTaShouldRankSkillMatchesFirst() throws Exception {
@@ -60,6 +69,32 @@ class AiAssistantServiceImplTest {
     }
 
     @Test
+    void summarizeCandidateForMoShouldAttachPdfCvToReadyProvider() throws Exception {
+        Files.write(tempDir.resolve("james_cv.pdf"), "%PDF-1.4\nJames CV evidence\n%%EOF".getBytes(StandardCharsets.UTF_8));
+        User ta = user("TA001", "James", "james@school.edu", "Password123!", "ta");
+        ta.skills = List.of("Java", "Communication");
+        ta.cvPath = "/uploads/james_cv.pdf";
+        Job job = job("JOB001", "TA for Software Engineering", "EBU6304", "open", "2026-04-01");
+        job.requiredSkills = "Java, OOP";
+        job.postedBy = "MO001";
+        InMemoryFileStorage storage = new InMemoryFileStorage()
+            .withUsers(List.of(ta))
+            .withJobs(List.of(job))
+            .withApplications(List.of(application("APP001", "TA001", "JOB001", "pending", "2026-04-01")));
+        CapturingAiProvider provider = new CapturingAiProvider();
+        AiAssistantServiceImpl service = new AiAssistantServiceImpl(storage, tempDir, provider);
+
+        Map<String, Object> data = service.summarizeCandidateForMo("MO001", "APP001");
+        Map<?, ?> cv = (Map<?, ?>) data.get("cv");
+
+        assertTrue(provider.fileCalled);
+        assertTrue(provider.capturedFile.dataUrl().startsWith("data:application/pdf;base64,"));
+        assertEquals("james_cv.pdf", provider.capturedFile.fileName());
+        assertEquals(Boolean.TRUE, data.get("cvSentToModel"));
+        assertEquals(Boolean.TRUE, cv.get("modelReadable"));
+    }
+
+    @Test
     void summarizeCandidateForMoShouldRejectUnownedApplication() {
         User ta = user("TA001", "James", "james@school.edu", "Password123!", "ta");
         Job job = job("JOB001", "TA for Software Engineering", "EBU6304", "open", "2026-04-01");
@@ -98,5 +133,52 @@ class AiAssistantServiceImplTest {
 
         assertEquals("TA001", firstRisk.get("userId"));
         assertEquals("overload", firstRisk.get("riskLevel"));
+    }
+
+    private static class CapturingAiProvider implements AiProvider {
+        boolean fileCalled;
+        AiFileInput capturedFile;
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public Map<String, Object> status() {
+            return Map.of("providerReady", true);
+        }
+
+        @Override
+        public AiProviderResult complete(String systemPrompt, String userPrompt, int maxTokens) {
+            return result();
+        }
+
+        @Override
+        public AiProviderResult completeWithFile(String systemPrompt, String userPrompt, AiFileInput file, int maxTokens) {
+            this.fileCalled = true;
+            this.capturedFile = file;
+            return result();
+        }
+
+        private AiProviderResult result() {
+            String json = """
+                {
+                  "headline": "Review James with CV evidence.",
+                  "priority": {
+                    "label": "Review recommendation",
+                    "title": "Verify OOP evidence",
+                    "reason": "The CV and profile should be checked together.",
+                    "meta": "cv attached"
+                  },
+                  "sections": [
+                    {"title": "Evidence", "tone": "strength", "items": ["PDF CV was provided."]},
+                    {"title": "Gaps", "tone": "risk", "items": ["OOP evidence still needs confirmation."]},
+                    {"title": "Questions", "tone": "action", "items": ["Can James confirm OOP teaching experience?"]}
+                  ]
+                }
+                """;
+            return new AiProviderResult(json, "", "test-model", "stop", new LinkedHashMap<>());
+        }
     }
 }

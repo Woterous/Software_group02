@@ -11,9 +11,12 @@ import com.group02.tars.storage.FileStorage;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -26,6 +29,7 @@ import java.util.Set;
 public class AiAssistantServiceImpl implements AiAssistantService {
     private static final int OVERLOAD_HOURS = 28;
     private static final int WARNING_HOURS = 20;
+    private static final long MAX_INLINE_CV_BYTES = 5L * 1024L * 1024L;
     private static final String SYSTEM_PROMPT = """
         You are the embedded AI assistant for a teaching assistant recruitment system.
         Use only the provided JSON context. Do not invent users, jobs, decisions, files, or policies.
@@ -40,14 +44,24 @@ public class AiAssistantServiceImpl implements AiAssistantService {
 
     private final FileStorage storage;
     private final AiProvider provider;
+    private final Path uploadDir;
     private final ObjectMapper mapper = new ObjectMapper();
 
     public AiAssistantServiceImpl(FileStorage storage) {
-        this(storage, new ZaiAiProvider());
+        this(storage, null, new ZaiAiProvider());
+    }
+
+    public AiAssistantServiceImpl(FileStorage storage, Path uploadDir) {
+        this(storage, uploadDir, new ZaiAiProvider());
     }
 
     AiAssistantServiceImpl(FileStorage storage, AiProvider provider) {
+        this(storage, null, provider);
+    }
+
+    AiAssistantServiceImpl(FileStorage storage, Path uploadDir, AiProvider provider) {
         this.storage = Objects.requireNonNull(storage);
+        this.uploadDir = uploadDir == null ? null : uploadDir.toAbsolutePath().normalize();
         this.provider = Objects.requireNonNull(provider);
     }
 
@@ -138,9 +152,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         cv.put("uploaded", !cvFileName.isBlank());
         cv.put("cvPath", ServiceSupport.normalize(applicant.cvPath));
         cv.put("fileName", cvFileName);
-        cv.put("multimodalInputHint", cvFileName.isBlank()
-            ? "No CV file is available for model reading."
-            : "Use the secured CV file endpoint or local upload file as the multimodal document input.");
+        AiFileInput cvInput = buildCvFileInput(cvFileName, cv);
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("provider", providerStatus());
@@ -160,7 +172,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         data.put("summary", deterministicSummary);
         data.put("deterministicSummary", deterministicSummary);
         data.put("reviewQuestions", buildReviewQuestions(match, cvFileName));
-        attachMoCandidateView(data, candidate, jobData, cv, application, match, deterministicSummary);
+        attachMoCandidateView(data, candidate, jobData, cv, application, match, deterministicSummary, cvInput);
         return data;
     }
 
@@ -465,11 +477,13 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         Map<String, Object> cv,
         Application application,
         MatchResult match,
-        String deterministicSummary
+        String deterministicSummary,
+        AiFileInput cvInput
     ) {
         Map<String, Object> fallback = buildLocalMoCandidateView(candidate, job, cv, application, match, deterministicSummary);
         data.put("modelView", fallback);
         data.put("modelCalled", false);
+        data.put("cvSentToModel", false);
 
         if (!provider.isReady()) {
             data.put("modelUnavailableReason", "AI provider is not configured.");
@@ -498,6 +512,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
 
                 Rules:
                 - Use only the provided candidate, job, CV, and application context.
+                - If a CV PDF is attached, read it and use concrete evidence from the document.
                 - Keep each section to 2-4 items.
                 - Do not make a final hiring decision; recommend what the MO should verify next.
                 - JSON only.
@@ -515,10 +530,17 @@ public class AiAssistantServiceImpl implements AiAssistantService {
                     "localSummary", deterministicSummary,
                     "reviewQuestions", data.get("reviewQuestions")
                 )));
-            AiProviderResult result = provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 1000);
+            AiProviderResult result = cvInput == null
+                ? provider.complete(JSON_SYSTEM_PROMPT, userPrompt, 1000)
+                : provider.completeWithFile(JSON_SYSTEM_PROMPT, userPrompt, cvInput, 1400);
             Map<String, Object> parsed = parseJsonObject(result.content());
             Map<String, Object> normalized = normalizeStructuredView(parsed, fallback);
             data.put("modelCalled", true);
+            data.put("cvSentToModel", cvInput != null);
+            if (cvInput != null) {
+                data.put("cvInputMode", "inline-data-url");
+                data.put("cvInputFileName", cvInput.fileName());
+            }
             data.put("modelView", normalized);
             data.put("modelAnalysis", mapper.writeValueAsString(normalized));
             data.put("summary", normalized.get("headline"));
@@ -528,6 +550,49 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         } catch (Exception ex) {
             data.put("modelCalled", false);
             data.put("modelError", ex.getMessage());
+        }
+    }
+
+    private AiFileInput buildCvFileInput(String cvFileName, Map<String, Object> cv) {
+        cv.put("modelReadable", false);
+        cv.put("modelInputMode", "none");
+
+        String normalizedName = ServiceSupport.normalize(cvFileName);
+        if (normalizedName.isBlank()) {
+            cv.put("modelInputReason", "No CV file is available.");
+            return null;
+        }
+        if (!normalizedName.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+            cv.put("modelInputReason", "Only PDF CV files are attached to the multimodal model request.");
+            return null;
+        }
+        if (uploadDir == null) {
+            cv.put("modelInputReason", "Upload directory is not configured for AI file input.");
+            return null;
+        }
+
+        try {
+            Path target = uploadDir.resolve(normalizedName).normalize();
+            if (!target.startsWith(uploadDir) || !Files.isRegularFile(target)) {
+                cv.put("modelInputReason", "CV file was not found in the upload directory.");
+                return null;
+            }
+            long size = Files.size(target);
+            if (size <= 0 || size > MAX_INLINE_CV_BYTES) {
+                cv.put("modelInputReason", "CV file is empty or larger than the AI inline upload limit.");
+                cv.put("sizeBytes", size);
+                return null;
+            }
+
+            String base64 = Base64.getEncoder().encodeToString(Files.readAllBytes(target));
+            cv.put("modelReadable", true);
+            cv.put("modelInputMode", "inline-data-url");
+            cv.put("modelInputReason", "PDF CV is attached to the multimodal model request.");
+            cv.put("sizeBytes", size);
+            return new AiFileInput(normalizedName, "application/pdf", "data:application/pdf;base64," + base64);
+        } catch (Exception ex) {
+            cv.put("modelInputReason", "CV file could not be prepared for AI input: " + ex.getMessage());
+            return null;
         }
     }
 

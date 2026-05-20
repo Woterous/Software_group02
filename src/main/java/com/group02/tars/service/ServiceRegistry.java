@@ -9,6 +9,7 @@ import com.group02.tars.service.impl.MoServiceImpl;
 import com.group02.tars.service.impl.UserServiceImpl;
 import com.group02.tars.storage.FileStorage;
 import com.group02.tars.storage.JsonFileStorage;
+import com.group02.tars.util.DataDirectoryResolver;
 import jakarta.servlet.ServletContext;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class ServiceRegistry {
         this.moService = new MoServiceImpl(storage);
         this.adminService = new AdminServiceImpl(storage);
         this.cvAccessService = new CvAccessServiceImpl(storage);
-        this.aiAssistantService = new AiAssistantServiceImpl(storage);
+        this.aiAssistantService = new AiAssistantServiceImpl(storage, DataDirectoryResolver.resolveUploadsDir(context));
     }
 
     public static ServiceRegistry from(ServletContext context) throws IOException {

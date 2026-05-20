@@ -35,6 +35,9 @@ Yes, when environment variables are configured. The provider status shows whethe
 ### Q9: Why does the AI return JSON?
 Raw model text is hard to display consistently. The backend asks for strict JSON and parses it into fields such as headline, priority, evidence, risks, and actions. The frontend renders these fields as cards.
 
+### Q9a: Does MO AI really read the uploaded CV?
+For PDF CV files, yes. The backend resolves the applicant CV from `data/uploads`, converts the PDF to an inline data URL, and sends it to the multimodal GLM request together with the candidate, job, and application context. The response includes `cvSentToModel=true` when the PDF was attached successfully.
+
 ### Q10: What happens if AI fails?
 The service keeps deterministic fallback output. The main system still works because AI is advisory, not required for core operations.
 
