@@ -55,18 +55,16 @@ No custom envelope variants are allowed.
   - default: `pending`
   - update: `pending -> selected/rejected`
 
-## 6. Mock-to-Real switch policy
-Frontend data source switch location:
-- `src/main/webapp/static/js/core/config.js`
+## 6. Runtime data policy
+Frontend uses the real Servlet API only. Mock data files and mock JavaScript engines are not part of the final runtime.
 
-Current mode:
-- `dataSource: "api"`
+Data is stored in JSON files under the resolved `data/` directory:
+- `users.json`
+- `jobs.json`
+- `applications.json`
+- `uploads/`
 
-Integration mode:
-1. switch to `dataSource: "api"` (already active in current branch)
-2. keep `ApiClient` method names unchanged
-3. implement backend endpoints as documented
-4. validate endpoint parity against `openapi.yaml`
+Only TA users should have CV paths. MO and Admin users do not upload or maintain CV files.
 
 ## 7. AI provider integration policy
 - Do not hardcode API keys in repository files.
@@ -78,7 +76,7 @@ Integration mode:
 - For multimodal CV analysis, the provider adapter should read the authorized local file from `data/uploads` and submit the file content using the selected model's native file/document input format.
 
 ## 8. Contract freeze rule
-Before Sprint 2 demo freeze, do not change:
+Before final assessment freeze, do not change:
 - endpoint paths
 - request/response field names
 - envelope structure
@@ -96,3 +94,4 @@ If change is unavoidable:
 - [ ] pagination meta validated
 - [ ] duplicate-application conflict validated (`409`)
 - [ ] role-based access checks validated (`403`)
+

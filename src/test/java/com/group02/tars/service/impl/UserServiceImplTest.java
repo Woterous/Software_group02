@@ -61,6 +61,20 @@ class UserServiceImplTest {
     }
 
     @Test
+    void registerShouldIgnoreCvPathForMoAndAdminUsers() throws Exception {
+        InMemoryFileStorage storage = new InMemoryFileStorage();
+        UserServiceImpl service = new UserServiceImpl(storage);
+
+        User mo = service.register("Owner", "owner@school.edu", "Pass123!", "mo", "Coordination", "/uploads/mo.pdf");
+        User admin = service.register("Admin", "admin@school.edu", "Pass123!", "admin", "Governance", "/uploads/admin.pdf");
+
+        assertEquals("", mo.cvPath);
+        assertEquals("", admin.cvPath);
+        assertEquals("", storage.loadUsers().get(0).cvPath);
+        assertEquals("", storage.loadUsers().get(1).cvPath);
+    }
+
+    @Test
     void loginShouldMatchNormalizedCredentials() throws Exception {
         InMemoryFileStorage storage = new InMemoryFileStorage()
             .withUsers(List.of(user("TA001", "James", "james@school.edu", "Pass123!", "ta")));

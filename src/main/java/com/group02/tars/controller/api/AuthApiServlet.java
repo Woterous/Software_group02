@@ -68,9 +68,11 @@ public class AuthApiServlet extends BaseApiServlet {
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             RegisterPayload payload = readRegisterPayload(req);
-            String cvPath = payload.cvPath();
+            String normalizedRole = payload.role().trim().isBlank() ? "ta" : payload.role().trim().toLowerCase(Locale.ROOT);
+            boolean taRole = "ta".equals(normalizedRole);
+            String cvPath = taRole ? payload.cvPath() : "";
             Path uploadedCvFile = null;
-            if (payload.cvFile != null && payload.cvFile.getSize() > 0) {
+            if (taRole && payload.cvFile != null && payload.cvFile.getSize() > 0) {
                 SavedCv savedCv = saveRegistrationCv(payload.cvFile);
                 cvPath = savedCv.cvPath();
                 uploadedCvFile = savedCv.filePath();

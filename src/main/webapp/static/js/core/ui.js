@@ -448,16 +448,19 @@
                     btn.disabled = false;
                     return;
                 }
-                if (window.MockEngine && typeof window.MockEngine.setSession === "function") {
-                    window.MockEngine.setSession(null);
-                }
+                window.sessionStorage.removeItem("tars.session.user");
                 window.location.href = `${window.APP_CONTEXT}/pages/login`;
             });
         });
     }
 
     function ensureSessionOrRedirect(allowedRoles) {
-        const session = window.MockEngine.getSession();
+        let session = null;
+        try {
+            session = JSON.parse(window.sessionStorage.getItem("tars.session.user") || "null");
+        } catch (_) {
+            session = null;
+        }
         if (!session || (allowedRoles && !allowedRoles.includes(session.role))) {
             window.location.href = `${window.APP_CONTEXT}/pages/login`;
             return null;

@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         user.skills = ServiceSupport.splitCsv(skillsCsv);
         user.major = "";
         user.contact = "";
-        user.cvPath = ServiceSupport.normalize(cvPath);
+        user.cvPath = "ta".equals(normalizedRole) ? ServiceSupport.normalize(cvPath) : "";
         validateCvPath(user.cvPath);
 
         users.add(user);

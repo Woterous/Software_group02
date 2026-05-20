@@ -246,7 +246,11 @@ window.PageModules.public = window.PageModules.public || {};
     }
 
     function currentSession() {
-        return window.MockEngine.getSession();
+        try {
+            return JSON.parse(window.sessionStorage.getItem("tars.session.user") || "null");
+        } catch (_) {
+            return null;
+        }
     }
 
     function bindPasswordToggle(form, passwordInput, options) {
@@ -290,9 +294,7 @@ window.PageModules.public = window.PageModules.public || {};
                 window.UIKit.toast(result.error.message, "error");
                 return;
             }
-            if (window.MockEngine && typeof window.MockEngine.setSession === "function") {
-                window.MockEngine.setSession(result.data.user);
-            }
+            window.sessionStorage.setItem("tars.session.user", JSON.stringify(result.data.user));
             window.UIKit.toast("Login successful.", "success");
             const role = result.data.user.role;
             setTimeout(() => {
