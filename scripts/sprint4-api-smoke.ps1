@@ -57,8 +57,12 @@ Assert-True ($taAi.data.modelView -ne $null) "TA AI should return modelView"
 Write-Host "[4/8] CV file endpoint"
 $tempCv = Join-Path $env:TEMP "tars-sprint4-cv-check.pdf"
 $tempHeaders = Join-Path $env:TEMP "tars-sprint4-cv-headers.txt"
+$cvPath = [string]$profile.data.profile.cvPath
+Assert-True (-not [string]::IsNullOrWhiteSpace($cvPath)) "TA profile should include a CV path"
+$cvFileName = Split-Path -Leaf ($cvPath -replace "\\", "/")
+Assert-True (-not [string]::IsNullOrWhiteSpace($cvFileName)) "TA CV path should include a file name"
 $sessionCookie = $ta.Cookies.GetCookies([Uri]$BaseUrl)["JSESSIONID"].Value
-& curl.exe -sS -D $tempHeaders -o $tempCv -H "Cookie: JSESSIONID=$sessionCookie" "$BaseUrl/files/cv/james_cv.pdf"
+& curl.exe -sS -D $tempHeaders -o $tempCv -H "Cookie: JSESSIONID=$sessionCookie" "$BaseUrl/files/cv/$cvFileName"
 Assert-True ($LASTEXITCODE -eq 0) "curl should download the CV file"
 $headersText = Get-Content -Raw $tempHeaders
 Assert-True ($headersText -match "200") "CV endpoint should return 200"
