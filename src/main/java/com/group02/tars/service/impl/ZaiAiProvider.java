@@ -70,12 +70,36 @@ class ZaiAiProvider implements AiProvider {
             throw new ServiceException(503, "AI_PROVIDER_NOT_CONFIGURED", "AI provider is not configured.");
         }
 
-        Map<String, Object> requestBody = new LinkedHashMap<>();
-        requestBody.put("model", model);
-        requestBody.put("messages", List.of(
+        return completeMessages(List.of(
             Map.of("role", "system", "content", systemPrompt),
             Map.of("role", "user", "content", userPrompt)
-        ));
+        ), maxTokens);
+    }
+
+    @Override
+    public AiProviderResult completeWithFile(String systemPrompt, String userPrompt, AiFileInput file, int maxTokens)
+        throws IOException, ServiceException {
+        if (!isReady()) {
+            throw new ServiceException(503, "AI_PROVIDER_NOT_CONFIGURED", "AI provider is not configured.");
+        }
+        if (file == null || file.dataUrl() == null || file.dataUrl().isBlank()) {
+            return complete(systemPrompt, userPrompt, maxTokens);
+        }
+
+        return completeMessages(List.of(
+            Map.of("role", "system", "content", systemPrompt),
+            Map.of("role", "user", "content", List.of(
+                Map.of("type", "text", "text", userPrompt),
+                Map.of("type", "file_url", "file_url", Map.of("url", file.dataUrl()))
+            ))
+        ), maxTokens);
+    }
+
+    private AiProviderResult completeMessages(List<Map<String, Object>> messages, int maxTokens)
+        throws IOException, ServiceException {
+        Map<String, Object> requestBody = new LinkedHashMap<>();
+        requestBody.put("model", model);
+        requestBody.put("messages", messages);
         requestBody.put("stream", false);
         requestBody.put("temperature", 0.2);
         requestBody.put("max_tokens", Math.max(64, maxTokens));

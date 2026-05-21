@@ -1484,6 +1484,29 @@ button:active {
     width: min(560px, 100%);
 }
 
+.register-cv-field {
+    display: grid;
+    gap: 8px;
+    transform-origin: top center;
+    transition:
+        max-height 420ms var(--ease-smooth),
+        opacity 260ms var(--ease-smooth),
+        transform 320ms var(--ease-smooth),
+        margin 320ms var(--ease-smooth);
+    max-height: 340px;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    overflow: hidden;
+}
+
+.register-cv-field.is-hidden {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
+    margin: -8px 0 0;
+    pointer-events: none;
+}
+
 @media (max-width: 1300px) {
     .login-split {
         grid-template-columns: 1fr;

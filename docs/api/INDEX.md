@@ -18,8 +18,7 @@ It is **decision-complete** for backend implementation:
 | `contracts.md` | Human-readable endpoint contracts and examples |
 | `schemas.md` | Field dictionary and entity schema rules |
 | `errors.md` | HTTP statuses and business error codes |
-| `integration-guidelines.md` | Auth, filters, sorting, idempotency, and mock-to-real policy |
-| `sprint3-api-sync.md` | Sprint 3 real-backend API synchronisation notes |
+| `integration-guidelines.md` | Auth, filters, sorting, idempotency, runtime data, and AI provider policy |
 | `../ai-assistant-design.md` | AI assistant tool design, CV handling, and provider integration notes |
 
 ## 3. Base Conventions
@@ -98,6 +97,7 @@ It is **decision-complete** for backend implementation:
 | `/pages/admin/users` | `GET /admin/users` |
 | `/pages/admin/applications` | `GET /admin/applications` |
 | `/pages/admin/workload` | `GET /admin/workload`, `POST /ai/admin/risk-analysis` |
+
 
 
 

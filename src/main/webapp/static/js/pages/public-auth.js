@@ -254,7 +254,11 @@ window.PageModules.public = window.PageModules.public || {};
     }
 
     function currentSession() {
-        return window.MockEngine.getSession();
+        try {
+            return JSON.parse(window.sessionStorage.getItem("tars.session.user") || "null");
+        } catch (_) {
+            return null;
+        }
     }
 
     function bindPasswordToggle(form, passwordInput, options) {
@@ -298,9 +302,7 @@ window.PageModules.public = window.PageModules.public || {};
                 window.UIKit.toast(result.error.message, "error");
                 return;
             }
-            if (window.MockEngine && typeof window.MockEngine.setSession === "function") {
-                window.MockEngine.setSession(result.data.user);
-            }
+            window.sessionStorage.setItem("tars.session.user", JSON.stringify(result.data.user));
             window.UIKit.toast("Login successful.", "success");
             const role = result.data.user.role;
             setTimeout(() => {
@@ -330,6 +332,8 @@ window.PageModules.public = window.PageModules.public || {};
         const cvDropzone = document.getElementById("register-cv-dropzone");
         const cvPickBtn = document.getElementById("register-cv-pick-btn");
         const cvSelectedFile = document.getElementById("register-cv-selected-file");
+        const cvField = document.getElementById("register-cv-field");
+        const roleRadios = Array.from(form.querySelectorAll('input[type="radio"][name="role"]'));
         const maxCvSize = 5 * 1024 * 1024;
         const allowedCvExt = new Set(["pdf", "doc", "docx"]);
         let selectedCvFile = null;
@@ -391,6 +395,26 @@ window.PageModules.public = window.PageModules.public || {};
             return true;
         };
 
+        const selectedRole = () => {
+            const checked = roleRadios.find((radio) => radio.checked);
+            return checked ? checked.value : "ta";
+        };
+
+        const syncCvVisibility = () => {
+            const isTa = selectedRole() === "ta";
+            if (cvField) {
+                cvField.classList.toggle("is-hidden", !isTa);
+                cvField.setAttribute("aria-hidden", String(!isTa));
+            }
+            if (!isTa) {
+                clearSelectedCvFile();
+            }
+        };
+
+        roleRadios.forEach((radio) => {
+            radio.addEventListener("change", syncCvVisibility);
+        });
+
         if (cvPickBtn && cvFileInput) {
             cvPickBtn.addEventListener("click", (event) => {
                 event.preventDefault();
@@ -447,13 +471,14 @@ window.PageModules.public = window.PageModules.public || {};
         }
 
         updateCvLabel();
+        syncCvVisibility();
 
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const payload = window.UIKit.formToObject(form);
             delete payload.cvFile;
 
-            const file = selectedCvFile || cvFileInput?.files?.[0] || null;
+            const file = payload.role === "ta" ? (selectedCvFile || cvFileInput?.files?.[0] || null) : null;
             if (file) {
                 const error = validateCvFile(file);
                 if (error) {
@@ -470,6 +495,7 @@ window.PageModules.public = window.PageModules.public || {};
             window.UIKit.toast("Account created. Please sign in.", "success");
             form.reset();
             clearSelectedCvFile();
+            syncCvVisibility();
             setTimeout(() => {
                 window.location.href = `${window.APP_CONTEXT}/pages/login`;
             }, 360);

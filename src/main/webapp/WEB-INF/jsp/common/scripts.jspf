@@ -2,8 +2,6 @@
     window.APP_CONTEXT = "${pageContext.request.contextPath}";
 </script>
 <script src="${pageContext.request.contextPath}/static/js/core/config.js"></script>
-<script src="${pageContext.request.contextPath}/static/js/core/mock-db.js"></script>
-<script src="${pageContext.request.contextPath}/static/js/core/mock-engine.js"></script>
 <script src="${pageContext.request.contextPath}/static/js/core/api-client.js"></script>
 <script src="${pageContext.request.contextPath}/static/js/core/ui.js"></script>
 <script src="${pageContext.request.contextPath}/static/js/core/global-ai.js"></script>

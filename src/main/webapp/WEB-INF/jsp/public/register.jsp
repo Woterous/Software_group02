@@ -118,7 +118,7 @@
                     <label class="full-row">Skills
                         <input type="text" name="skills" placeholder="Java, SQL, Communication" />
                     </label>
-                    <label class="full-row">CV (optional)
+                    <label id="register-cv-field" class="full-row register-cv-field">CV (optional)
                         <input id="register-cv-file-input" class="cv-upload-input" type="file" name="cvFile" accept=".pdf,.doc,.docx" />
                         <div id="register-cv-dropzone" class="cv-dropzone" tabindex="0" role="button" aria-label="Drop CV file here or choose file">
                             <div class="cv-dropzone-inner">

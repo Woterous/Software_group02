@@ -390,8 +390,13 @@ Success response (`200`):
       "uploaded": true,
       "cvPath": "/uploads/james_cv.pdf",
       "fileName": "james_cv.pdf",
-      "multimodalInputHint": "Use the secured CV file endpoint or local upload file as the multimodal document input."
+      "modelReadable": true,
+      "modelInputMode": "inline-data-url",
+      "modelInputReason": "PDF CV is attached to the multimodal model request."
     },
+    "cvSentToModel": true,
+    "cvInputMode": "inline-data-url",
+    "cvInputFileName": "james_cv.pdf",
     "matchedSkills": ["data structures"],
     "missingSkills": ["algorithms"],
     "summary": "James Wilson is applying for TA for Data Structures...",

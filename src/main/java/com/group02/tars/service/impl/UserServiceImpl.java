@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         user.skills = ServiceSupport.splitCsv(skillsCsv);  // "Java,Python" → ["Java","Python"]
         user.major = "";
         user.contact = "";
-        user.cvPath = ServiceSupport.normalize(cvPath);
+        user.cvPath = "ta".equals(normalizedRole) ? ServiceSupport.normalize(cvPath) : "";
         validateCvPath(user.cvPath);
 
         // 把新用户加到列表，整个写回文件

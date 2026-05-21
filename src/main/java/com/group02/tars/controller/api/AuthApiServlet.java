@@ -88,10 +88,12 @@ public class AuthApiServlet extends BaseApiServlet {
         try {
             // ① 解析前端发来的请求数据（支持JSON和multipart/form-data两种格式）
             RegisterPayload payload = readRegisterPayload(req);
-            String cvPath = payload.cvPath();
+            String normalizedRole = payload.role().trim().isBlank() ? "ta" : payload.role().trim().toLowerCase(Locale.ROOT);
+            boolean taRole = "ta".equals(normalizedRole);
+            String cvPath = taRole ? payload.cvPath() : "";
             Path uploadedCvFile = null;
             // ② 如果有CV文件，先存到服务器磁盘 data/uploads/
-            if (payload.cvFile != null && payload.cvFile.getSize() > 0) {
+            if (taRole && payload.cvFile != null && payload.cvFile.getSize() > 0) {
                 SavedCv savedCv = saveRegistrationCv(payload.cvFile);
                 cvPath = savedCv.cvPath();
                 uploadedCvFile = savedCv.filePath();

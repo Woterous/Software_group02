@@ -1,0 +1,1117 @@
+[
+  {
+    "userId": "MO001",
+    "name": "Dr. Kevin Zhao",
+    "email": "kevin.zhao@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Software Engineering",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020001"
+  },
+  {
+    "userId": "MO002",
+    "name": "Dr. Olivia Davis",
+    "email": "olivia.davis@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Data Systems",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020002"
+  },
+  {
+    "userId": "MO003",
+    "name": "Dr. Hannah Miller",
+    "email": "hannah.miller@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Algorithms",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020003"
+  },
+  {
+    "userId": "MO004",
+    "name": "Dr. Daniel Green",
+    "email": "daniel.green@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Computer Networks",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020004"
+  },
+  {
+    "userId": "MO005",
+    "name": "Dr. Rachel Adams",
+    "email": "rachel.adams@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Operating Systems",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020005"
+  },
+  {
+    "userId": "MO006",
+    "name": "Dr. Ethan Carter",
+    "email": "ethan.carter@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Cyber Security",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020006"
+  },
+  {
+    "userId": "MO007",
+    "name": "Dr. Lily Turner",
+    "email": "lily.turner@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Web Engineering",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020007"
+  },
+  {
+    "userId": "MO008",
+    "name": "Dr. Nathan Brooks",
+    "email": "nathan.brooks@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Artificial Intelligence",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020008"
+  },
+  {
+    "userId": "MO009",
+    "name": "Dr. Grace Edwards",
+    "email": "grace.edwards@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Machine Learning",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020009"
+  },
+  {
+    "userId": "MO010",
+    "name": "Dr. Samuel Parker",
+    "email": "samuel.parker@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Human Computer Interaction",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020010"
+  },
+  {
+    "userId": "MO011",
+    "name": "Dr. Chloe Bennett",
+    "email": "chloe.bennett@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Cloud Computing",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020011"
+  },
+  {
+    "userId": "MO012",
+    "name": "Dr. Isaac Morgan",
+    "email": "isaac.morgan@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Distributed Systems",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020012"
+  },
+  {
+    "userId": "MO013",
+    "name": "Dr. Amelia Reed",
+    "email": "amelia.reed@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Mobile Development",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020013"
+  },
+  {
+    "userId": "MO014",
+    "name": "Dr. Noah Hughes",
+    "email": "noah.hughes@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Data Visualization",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020014"
+  },
+  {
+    "userId": "MO015",
+    "name": "Dr. Ava Phillips",
+    "email": "ava.phillips@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Software Testing",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020015"
+  },
+  {
+    "userId": "MO016",
+    "name": "Dr. Lucas Ward",
+    "email": "lucas.ward@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Computer Graphics",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020016"
+  },
+  {
+    "userId": "MO017",
+    "name": "Dr. Mia Collins",
+    "email": "mia.collins@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Information Retrieval",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020017"
+  },
+  {
+    "userId": "MO018",
+    "name": "Dr. Leo Richardson",
+    "email": "leo.richardson@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Project Management",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020018"
+  },
+  {
+    "userId": "MO019",
+    "name": "Dr. Zoe Foster",
+    "email": "zoe.foster@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Database Administration",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020019"
+  },
+  {
+    "userId": "MO020",
+    "name": "Dr. Owen Stewart",
+    "email": "owen.stewart@school.edu",
+    "password": "Password123!",
+    "role": "mo",
+    "skills": [
+      "Programming Education",
+      "Teaching Coordination",
+      "Assessment Design"
+    ],
+    "major": "Faculty",
+    "contact": "+86-13800020020"
+  },
+  {
+    "userId": "TA001",
+    "name": "Emma Thompson",
+    "email": "emma@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Java",
+      "OOP",
+      "Tutoring",
+      "Teamwork"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010001",
+    "cvPath": "/uploads/TA001_cv.pdf"
+  },
+  {
+    "userId": "TA002",
+    "name": "James Wilson",
+    "email": "james@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Algorithms",
+      "Python",
+      "Data Structures",
+      "Database"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010002",
+    "cvPath": "/uploads/TA002_cv.pdf"
+  },
+  {
+    "userId": "TA003",
+    "name": "Sophie Lee",
+    "email": "sophie@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "SQL",
+      "DB Design",
+      "Lab Support",
+      "Data Modeling"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010003",
+    "cvPath": "/uploads/TA003_cv.pdf"
+  },
+  {
+    "userId": "TA004",
+    "name": "Michael Brown",
+    "email": "michael@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Networks",
+      "Linux",
+      "Debugging",
+      "Wireshark"
+    ],
+    "major": "Network Engineering",
+    "contact": "+86-13800010004",
+    "cvPath": "/uploads/TA004_cv.pdf"
+  },
+  {
+    "userId": "TA005",
+    "name": "Alice Anderson",
+    "email": "alice.anderson@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Java",
+      "OOP",
+      "Teamwork",
+      "Git"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010005",
+    "cvPath": "/uploads/TA005_cv.pdf"
+  },
+  {
+    "userId": "TA006",
+    "name": "Brian Baker",
+    "email": "brian.baker@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Algorithms",
+      "Data Structures",
+      "Python",
+      "Problem Solving"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010006",
+    "cvPath": "/uploads/TA006_cv.pdf"
+  },
+  {
+    "userId": "TA007",
+    "name": "Caroline Clark",
+    "email": "caroline.clark@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "SQL",
+      "Database Design",
+      "Data Modeling",
+      "ER Diagrams"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010007",
+    "cvPath": "/uploads/TA007_cv.pdf"
+  },
+  {
+    "userId": "TA008",
+    "name": "David Diaz",
+    "email": "david.diaz@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Networking Protocols",
+      "Wireshark",
+      "Linux",
+      "Debugging"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010008",
+    "cvPath": "/uploads/TA008_cv.pdf"
+  },
+  {
+    "userId": "TA009",
+    "name": "Ella Evans",
+    "email": "ella.evans@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Operating Systems",
+      "C",
+      "Processes",
+      "Memory Management"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010009",
+    "cvPath": "/uploads/TA009_cv.pdf"
+  },
+  {
+    "userId": "TA010",
+    "name": "Felix Fisher",
+    "email": "felix.fisher@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cyber Security",
+      "Risk Analysis",
+      "Linux",
+      "Scripting"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010010",
+    "cvPath": "/uploads/TA010_cv.pdf"
+  },
+  {
+    "userId": "TA011",
+    "name": "Georgia Garcia",
+    "email": "georgia.garcia@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Servlet",
+      "JSP"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010011",
+    "cvPath": "/uploads/TA011_cv.pdf"
+  },
+  {
+    "userId": "TA012",
+    "name": "Henry Hill",
+    "email": "henry.hill@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Artificial Intelligence",
+      "Python",
+      "Prompting",
+      "Data Analysis"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010012",
+    "cvPath": "/uploads/TA012_cv.pdf"
+  },
+  {
+    "userId": "TA013",
+    "name": "Ivy Irwin",
+    "email": "ivy.irwin@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Machine Learning",
+      "Python",
+      "Pandas",
+      "Model Evaluation"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010013",
+    "cvPath": "/uploads/TA013_cv.pdf"
+  },
+  {
+    "userId": "TA014",
+    "name": "Jack Jones",
+    "email": "jack.jones@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HCI",
+      "UX Research",
+      "Prototyping",
+      "Usability Testing"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010014",
+    "cvPath": "/uploads/TA014_cv.pdf"
+  },
+  {
+    "userId": "TA015",
+    "name": "Katherine King",
+    "email": "katherine.king@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cloud Computing",
+      "Docker",
+      "Deployment",
+      "Monitoring"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010015",
+    "cvPath": "/uploads/TA015_cv.pdf"
+  },
+  {
+    "userId": "TA016",
+    "name": "Louis Lewis",
+    "email": "louis.lewis@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Distributed Systems",
+      "Concurrency",
+      "Fault Tolerance",
+      "Java"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010016",
+    "cvPath": "/uploads/TA016_cv.pdf"
+  },
+  {
+    "userId": "TA017",
+    "name": "Maya Moore",
+    "email": "maya.moore@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Mobile Development",
+      "Android",
+      "UI Design",
+      "Kotlin"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010017",
+    "cvPath": "/uploads/TA017_cv.pdf"
+  },
+  {
+    "userId": "TA018",
+    "name": "Neil Nelson",
+    "email": "neil.nelson@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Data Visualization",
+      "Charts",
+      "JavaScript",
+      "Storytelling"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010018",
+    "cvPath": "/uploads/TA018_cv.pdf"
+  },
+  {
+    "userId": "TA019",
+    "name": "Orla Owens",
+    "email": "orla.owens@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Software Testing",
+      "JUnit",
+      "Test Design",
+      "Quality Assurance"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010019",
+    "cvPath": "/uploads/TA019_cv.pdf"
+  },
+  {
+    "userId": "TA020",
+    "name": "Peter Price",
+    "email": "peter.price@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Java",
+      "OOP",
+      "Teamwork",
+      "Git"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010020",
+    "cvPath": "/uploads/TA020_cv.pdf"
+  },
+  {
+    "userId": "TA021",
+    "name": "Queenie Quincy",
+    "email": "queenie.quincy@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Algorithms",
+      "Data Structures",
+      "Python",
+      "Problem Solving"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010021",
+    "cvPath": "/uploads/TA021_cv.pdf"
+  },
+  {
+    "userId": "TA022",
+    "name": "Ryan Rivera",
+    "email": "ryan.rivera@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "SQL",
+      "Database Design",
+      "Data Modeling",
+      "ER Diagrams"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010022",
+    "cvPath": "/uploads/TA022_cv.pdf"
+  },
+  {
+    "userId": "TA023",
+    "name": "Stella Scott",
+    "email": "stella.scott@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Networking Protocols",
+      "Wireshark",
+      "Linux",
+      "Debugging"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010023",
+    "cvPath": "/uploads/TA023_cv.pdf"
+  },
+  {
+    "userId": "TA024",
+    "name": "Tom Taylor",
+    "email": "tom.taylor@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Operating Systems",
+      "C",
+      "Processes",
+      "Memory Management"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010024",
+    "cvPath": "/uploads/TA024_cv.pdf"
+  },
+  {
+    "userId": "TA025",
+    "name": "Uma Usher",
+    "email": "uma.usher@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cyber Security",
+      "Risk Analysis",
+      "Linux",
+      "Scripting"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010025",
+    "cvPath": "/uploads/TA025_cv.pdf"
+  },
+  {
+    "userId": "TA026",
+    "name": "Victor Vaughn",
+    "email": "victor.vaughn@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Servlet",
+      "JSP"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010026",
+    "cvPath": "/uploads/TA026_cv.pdf"
+  },
+  {
+    "userId": "TA027",
+    "name": "Wendy White",
+    "email": "wendy.white@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Artificial Intelligence",
+      "Python",
+      "Prompting",
+      "Data Analysis"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010027",
+    "cvPath": "/uploads/TA027_cv.pdf"
+  },
+  {
+    "userId": "TA028",
+    "name": "Xavier Xu",
+    "email": "xavier.xu@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Machine Learning",
+      "Python",
+      "Pandas",
+      "Model Evaluation"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010028",
+    "cvPath": "/uploads/TA028_cv.pdf"
+  },
+  {
+    "userId": "TA029",
+    "name": "Yara Young",
+    "email": "yara.young@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HCI",
+      "UX Research",
+      "Prototyping",
+      "Usability Testing"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010029",
+    "cvPath": "/uploads/TA029_cv.pdf"
+  },
+  {
+    "userId": "TA030",
+    "name": "Zach Zimmer",
+    "email": "zach.zimmer@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cloud Computing",
+      "Docker",
+      "Deployment",
+      "Monitoring"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010030",
+    "cvPath": "/uploads/TA030_cv.pdf"
+  },
+  {
+    "userId": "TA031",
+    "name": "Nina Norris",
+    "email": "nina.norris@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Distributed Systems",
+      "Concurrency",
+      "Fault Tolerance",
+      "Java"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010031",
+    "cvPath": "/uploads/TA031_cv.pdf"
+  },
+  {
+    "userId": "TA032",
+    "name": "Oscar Ortiz",
+    "email": "oscar.ortiz@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Mobile Development",
+      "Android",
+      "UI Design",
+      "Kotlin"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010032",
+    "cvPath": "/uploads/TA032_cv.pdf"
+  },
+  {
+    "userId": "TA033",
+    "name": "Paula Patel",
+    "email": "paula.patel@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Data Visualization",
+      "Charts",
+      "JavaScript",
+      "Storytelling"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010033",
+    "cvPath": "/uploads/TA033_cv.pdf"
+  },
+  {
+    "userId": "TA034",
+    "name": "Quinn Qiao",
+    "email": "quinn.qiao@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Software Testing",
+      "JUnit",
+      "Test Design",
+      "Quality Assurance"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010034",
+    "cvPath": "/uploads/TA034_cv.pdf"
+  },
+  {
+    "userId": "TA035",
+    "name": "Ruby Russell",
+    "email": "ruby.russell@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Java",
+      "OOP",
+      "Teamwork",
+      "Git"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010035",
+    "cvPath": "/uploads/TA035_cv.pdf"
+  },
+  {
+    "userId": "TA036",
+    "name": "Sean Stone",
+    "email": "sean.stone@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Algorithms",
+      "Data Structures",
+      "Python",
+      "Problem Solving"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010036",
+    "cvPath": "/uploads/TA036_cv.pdf"
+  },
+  {
+    "userId": "TA037",
+    "name": "Tina Tan",
+    "email": "tina.tan@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "SQL",
+      "Database Design",
+      "Data Modeling",
+      "ER Diagrams"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010037",
+    "cvPath": "/uploads/TA037_cv.pdf"
+  },
+  {
+    "userId": "TA038",
+    "name": "Umar Underwood",
+    "email": "umar.underwood@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Networking Protocols",
+      "Wireshark",
+      "Linux",
+      "Debugging"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010038",
+    "cvPath": "/uploads/TA038_cv.pdf"
+  },
+  {
+    "userId": "TA039",
+    "name": "Vera Valdez",
+    "email": "vera.valdez@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Operating Systems",
+      "C",
+      "Processes",
+      "Memory Management"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010039",
+    "cvPath": "/uploads/TA039_cv.pdf"
+  },
+  {
+    "userId": "TA040",
+    "name": "Will Walker",
+    "email": "will.walker@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cyber Security",
+      "Risk Analysis",
+      "Linux",
+      "Scripting"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010040",
+    "cvPath": "/uploads/TA040_cv.pdf"
+  },
+  {
+    "userId": "TA041",
+    "name": "Xena Xie",
+    "email": "xena.xie@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Servlet",
+      "JSP"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010041",
+    "cvPath": "/uploads/TA041_cv.pdf"
+  },
+  {
+    "userId": "TA042",
+    "name": "Yuki Yamamoto",
+    "email": "yuki.yamamoto@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Artificial Intelligence",
+      "Python",
+      "Prompting",
+      "Data Analysis"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010042",
+    "cvPath": "/uploads/TA042_cv.pdf"
+  },
+  {
+    "userId": "TA043",
+    "name": "Aaron Allen",
+    "email": "aaron.allen@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Machine Learning",
+      "Python",
+      "Pandas",
+      "Model Evaluation"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010043",
+    "cvPath": "/uploads/TA043_cv.pdf"
+  },
+  {
+    "userId": "TA044",
+    "name": "Bella Bell",
+    "email": "bella.bell@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "HCI",
+      "UX Research",
+      "Prototyping",
+      "Usability Testing"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010044",
+    "cvPath": "/uploads/TA044_cv.pdf"
+  },
+  {
+    "userId": "TA045",
+    "name": "Cody Cooper",
+    "email": "cody.cooper@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Cloud Computing",
+      "Docker",
+      "Deployment",
+      "Monitoring"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010045",
+    "cvPath": "/uploads/TA045_cv.pdf"
+  },
+  {
+    "userId": "TA046",
+    "name": "Diana Duncan",
+    "email": "diana.duncan@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Distributed Systems",
+      "Concurrency",
+      "Fault Tolerance",
+      "Java"
+    ],
+    "major": "Software Engineering",
+    "contact": "+86-13800010046",
+    "cvPath": "/uploads/TA046_cv.pdf"
+  },
+  {
+    "userId": "TA047",
+    "name": "Evan Ellis",
+    "email": "evan.ellis@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Mobile Development",
+      "Android",
+      "UI Design",
+      "Kotlin"
+    ],
+    "major": "Information Systems",
+    "contact": "+86-13800010047",
+    "cvPath": "/uploads/TA047_cv.pdf"
+  },
+  {
+    "userId": "TA048",
+    "name": "Fiona Ford",
+    "email": "fiona.ford@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Data Visualization",
+      "Charts",
+      "JavaScript",
+      "Storytelling"
+    ],
+    "major": "Data Science",
+    "contact": "+86-13800010048",
+    "cvPath": "/uploads/TA048_cv.pdf"
+  },
+  {
+    "userId": "TA049",
+    "name": "Gavin Grant",
+    "email": "gavin.grant@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Software Testing",
+      "JUnit",
+      "Test Design",
+      "Quality Assurance"
+    ],
+    "major": "Cyber Security",
+    "contact": "+86-13800010049",
+    "cvPath": "/uploads/TA049_cv.pdf"
+  },
+  {
+    "userId": "TA050",
+    "name": "Hazel Hall",
+    "email": "hazel.hall@school.edu",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Java",
+      "OOP",
+      "Teamwork",
+      "Git"
+    ],
+    "major": "Computer Science",
+    "contact": "+86-13800010050",
+    "cvPath": "/uploads/TA050_cv.pdf"
+  },
+  {
+    "userId": "AD001",
+    "name": "Admin Chen",
+    "email": "admin.chen@school.edu",
+    "password": "Password123!",
+    "role": "admin",
+    "skills": [
+      "Governance",
+      "Operations",
+      "Workload Monitoring"
+    ],
+    "major": "Operations",
+    "contact": "+86-13800030001"
+  },
+  {
+    "userId": "TA051",
+    "name": "Jinglun Zhou",
+    "email": "jinglunzhou@qq.com",
+    "password": "Password123!",
+    "role": "ta",
+    "skills": [
+      "Algorithms",
+      "Python",
+      "Data Structures",
+      "java",
+      "c",
+      "Telecommunication"
+    ],
+    "major": "Telecommunication Engineering and Management",
+    "contact": "17602254517",
+    "cvPath": "/uploads/REG_1778572715600_70b7a28f.pdf"
+  }
+]
