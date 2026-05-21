@@ -13,6 +13,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
+/**
+ * CV 文件下载入口 —— 所有 /api/v1/files/cv/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流：CvFileServlet → CvAccessService(权限检查) → 磁盘 data/uploads/
+ * <p>
+ * 权限规则：Admin 可看所有、TA 只能看自己的、MO 只能看申请了自己职位的人的CV。
+ * 文件以二进制流返回，浏览器直接渲染PDF或在新标签页打开。
+ */
 public class CvFileServlet extends BaseApiServlet {
 
     @Override

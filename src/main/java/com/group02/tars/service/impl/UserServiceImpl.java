@@ -12,6 +12,14 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+/**
+ * 用户服务的核心实现 —— 所有关于用户的业务逻辑都在这里。
+ * <p>
+ * 信息流位置：AuthApiServlet → UserService接口 → 此处 → FileStorage → users.json
+ * <p>
+ * 角色：接收上层的原始数据，做业务校验和规则判断，通过后调FileStorage读写文件。
+ * 不直接操作JSON、不关心HTTP请求/响应。
+ */
 public class UserServiceImpl implements UserService {
 
     private static final List<String> VALID_ROLES = List.of("ta", "mo", "admin");
@@ -24,42 +32,56 @@ public class UserServiceImpl implements UserService {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * 注册 —— 信息流：AuthApiServlet → 此处 → FileStorage → users.json
+     * <p>
+     * 执行顺序：标准化输入 → 必填检查 → 邮箱格式验证 → 角色合法性 → 邮箱唯一性 → 分配ID → 组装对象 → 写入文件 → 返回safeCopy
+     */
     @Override
     public User register(String name, String email, String password, String role, String skillsCsv, String cvPath) throws IOException, ServiceException {
+        // 标准化输入（去空格、转小写），防止用户多打空格导致重复注册
         String normalizedName = ServiceSupport.normalize(name);
         String normalizedEmail = ServiceSupport.lower(email);
         String normalizedPassword = ServiceSupport.normalize(password);
         String roleInput = ServiceSupport.normalize(role);
         String normalizedRole = ServiceSupport.lower(roleInput.isBlank() ? "ta" : roleInput);
 
+        // 必填字段校验
         require(notBlank(normalizedName), "name");
         require(notBlank(normalizedEmail), "email");
         require(notBlank(normalizedPassword), "password");
+        // 邮箱格式校验（正则：xxx@xxx.xxx）
         validateEmail(normalizedEmail);
 
+        // 角色合法性校验（只能是 ta/mo/admin）
         if (!VALID_ROLES.contains(normalizedRole)) {
             throw new ServiceException(422, "VALIDATION_INVALID_ENUM", "Role must be ta, mo, or admin.");
         }
 
+        // 从文件加载所有用户，检查邮箱是否已被注册
         List<User> users = storage.loadUsers();
         if (users.stream().anyMatch(u -> ServiceSupport.lower(u.email).equals(normalizedEmail))) {
             throw new ServiceException(HttpServletResponse.SC_CONFLICT, "AUTH_EMAIL_EXISTS", "Email already exists.");
         }
 
+        // 组装新用户对象
         User user = new User();
         user.userId = ServiceSupport.nextId(prefixForRole(normalizedRole), users.stream().map(u -> u.userId).toList());
         user.name = normalizedName;
         user.email = normalizedEmail;
         user.password = normalizedPassword;
         user.role = normalizedRole;
-        user.skills = ServiceSupport.splitCsv(skillsCsv);
+        user.skills = ServiceSupport.splitCsv(skillsCsv);  // "Java,Python" → ["Java","Python"]
         user.major = "";
         user.contact = "";
         user.cvPath = ServiceSupport.normalize(cvPath);
         validateCvPath(user.cvPath);
 
+        // 把新用户加到列表，整个写回文件
         users.add(user);
         storage.saveUsers(users);
+
+        // 返回安全的用户拷贝（不含password字段），直接给前端
         return user.safeCopy();
     }
 

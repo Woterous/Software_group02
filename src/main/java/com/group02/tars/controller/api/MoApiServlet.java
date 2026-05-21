@@ -14,6 +14,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * MO 端 API 入口 —— 所有 /api/v1/mo/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流：MoApiServlet → MoService → FileStorage → JSON文件
+ * <p>
+ * 角色检查：所有方法都先 requireSessionUser("mo")，只允许 MO 角色访问。
+ * 提供的能力：仪表盘、职位创建/更新/列表、申请人列表与筛选、申请审核详情、录取/拒绝决策。
+ */
 public class MoApiServlet extends BaseApiServlet {
 
     @Override

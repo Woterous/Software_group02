@@ -10,6 +10,14 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * AI 助手 API 入口 —— 所有 /api/v1/ai/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流：AiApiServlet → AiAssistantService → FileStorage(读数据) + ZaiAiProvider(调模型)。
+ * <p>
+ * 提供的能力：AI提供商状态查询、自由聊天、TA职位推荐、MO候选人摘要、Admin风险分析。
+ * AI API Key 未配置时返回规则引擎的确定性fallback结果，不影响核心功能。
+ */
 public class AiApiServlet extends BaseApiServlet {
 
     @Override

@@ -15,6 +15,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * CV 访问控制实现 —— 判断谁有权限看谁的CV。
+ * <p>
+ * 信息流：CvFileServlet → CvAccessService接口 → 此处 → FileStorage
+ * <p>
+ * 权限矩阵：Admin → 全权限 / TA → 只能看自己的 / MO → 看申请了自己职位的人的 / 其他 → 拒绝
+ */
 public class CvAccessServiceImpl implements CvAccessService {
     private static final List<String> CV_EXTENSIONS = List.of(".pdf", ".doc", ".docx");
 

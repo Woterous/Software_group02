@@ -18,6 +18,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 所有API Servlet的父类 —— 提供公共能力：Session认证、角色校验、请求体解析、错误响应写入。
+ * <p>
+ * 信息流位置：每个API请求都会经过这里的 requireSessionUser() 做登录校验。
+ * <p>
+ * AuthApiServlet、TaApiServlet、MoApiServlet、AdminApiServlet 都继承这个类，
+ * 不需要在每个Servlet里重复写session检查和错误处理。
+ */
 public abstract class BaseApiServlet extends HttpServlet {
 
     protected static final String SESSION_USER_ID = "auth.userId";
@@ -26,6 +34,10 @@ public abstract class BaseApiServlet extends HttpServlet {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     protected ServiceRegistry registry;
 
+    /**
+     * Servlet启动时执行一次：创建ServiceRegistry（全局唯一的Service电话簿）。
+     * 之后所有请求通过 registry.xxxService() 获取对应的Service。
+     */
     @Override
     public void init() throws ServletException {
         try {
@@ -75,6 +87,14 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Session认证 + 角色校验 —— 每次API请求的守门人。
+     * <p>
+     * 检查流程：①从Session取userId和role → ②判空 → ③角色是否在允许列表中 → ④从文件确认用户存在。
+     * 任何一步失败都返回401或403 JSON错误，不会继续往下调Service。
+     * <p>
+     * @param allowedRoles 允许访问的角色列表，如 "ta","mo"；传空则只检查登录状态
+     */
     protected User requireSessionUser(HttpServletRequest req, HttpServletResponse resp, String... allowedRoles) throws IOException {
         HttpSession session = req.getSession(false);
         if (session == null) {

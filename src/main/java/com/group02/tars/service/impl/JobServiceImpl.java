@@ -15,6 +15,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 职位服务实现 —— 处理职位列表、详情、模块列表等查询操作。
+ * <p>
+ * 信息流：TaApiServlet → JobService接口 → 此处 → FileStorage → jobs.json
+ * <p>
+ * 所有方法都是读操作，不修改数据。写操作（创建/修改职位）在 MoServiceImpl 中。
+ */
 public class JobServiceImpl implements JobService {
 
     private final FileStorage storage;

@@ -1,3 +1,10 @@
+/**
+ * AI 助手浮窗组件 —— 页面右下角的聊天浮窗。
+ * <p>
+ * 信息流：用户输入 → ApiClient.aiChat() → AiApiServlet → AiAssistantService → 返回答案→渲染到浮窗。
+ * <p>
+ * 初始化入口：globalInitAiAssistant()，由各页面根据需要调用。
+ */
 (function () {
     function appendMessage(root, role, content, meta) {
         if (!root) return null;

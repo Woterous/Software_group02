@@ -24,6 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * TA 端 API 入口 —— 所有 /api/v1/ta/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流：TaApiServlet → Service → FileStorage → JSON文件
+ * <p>
+ * 角色检查：所有方法都先 requireSessionUser("ta")，只允许 TA 角色访问。
+ * 提供的能力：仪表盘数据、个人信息管理、CV上传/替换/删除、职位浏览与申请、我的申请列表。
+ */
 @MultipartConfig(
     fileSizeThreshold = 16 * 1024,
     maxFileSize = 5 * 1024 * 1024,

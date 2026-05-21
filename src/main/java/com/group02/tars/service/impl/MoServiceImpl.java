@@ -19,6 +19,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * MO 服务实现 —— 处理MO端所有业务逻辑：职位CRUD、申请人管理、审核决策。
+ * <p>
+ * 信息流：MoApiServlet → MoService接口 → 此处 → FileStorage → jobs.json + applications.json
+ * <p>
+ * 关键规则：
+ * - 创建职位时验证截止日期（不能是过去日期）
+ * - 选中申请时检查TA工作量上限（≥28小时/周则拒绝）
+ * - 跨表操作：listApplicants 关联 applications + users + jobs 三个文件
+ */
 public class MoServiceImpl implements MoService {
     private static final int MAX_SELECTED_WEEKLY_HOURS = 28;
 

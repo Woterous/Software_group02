@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 职位服务接口 —— 定义职位查询相关操作的方法签名。
+ */
 public interface JobService {
     PagedResult<Job> listJobs(String keyword, String module, String status, int page, int size) throws IOException;
 

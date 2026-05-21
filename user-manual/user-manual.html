@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA Recruitment System - User Manual</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 960px; margin: 0 auto; padding: 20px 24px; color: #1a1a2e; line-height: 1.7; }
+  h1 { border-bottom: 3px solid #0f766e; padding-bottom: 12px; color: #0f766e; }
+  h2 { background: #f0fdfa; padding: 10px 16px; border-left: 4px solid #0f766e; margin-top: 40px; color: #115e59; }
+  h3 { color: #134e4a; margin-top: 28px; }
+  img { max-width: 100%; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 12px 0; display: block; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #d4d4d8; padding: 10px 14px; text-align: left; }
+  th { background: #f4f4f5; }
+  code { background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .role-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
+  .role-ta { background: #dbeafe; color: #1e40af; }
+  .role-mo { background: #fef3c7; color: #92400e; }
+  .role-admin { background: #fce7f3; color: #9d174d; }
+  .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .tip { background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 24px; margin: 20px 0; }
+  .toc li { margin: 4px 0; }
+  .toc ul { padding-left: 20px; }
+  .img-group { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<h1>BUPT International School<br>TA Recruitment System — User Manual</h1>
+<p><strong>Version 4.0</strong> | May 2026 | Group 02 | EBU6304 Software Engineering</p>
+
+<div class="toc">
+<h3>Table of Contents</h3>
+<ol>
+  <li><a href="#getting-started">Getting Started</a></li>
+  <li><a href="#login">Login &amp; Registration</a>
+    <ul>
+      <li><a href="#login-page">2.1 Login Page</a></li>
+      <li><a href="#register-page">2.2 Registration Page</a></li>
+    </ul>
+  </li>
+  <li><a href="#ta">Teaching Assistant (TA)</a>
+    <ul>
+      <li><a href="#ta-dashboard">3.1 Dashboard</a></li>
+      <li><a href="#ta-profile">3.2 My Profile &amp; CV</a></li>
+      <li><a href="#ta-job-board">3.3 Job Board</a></li>
+      <li><a href="#ta-job-detail">3.4 Job Detail &amp; Apply</a></li>
+      <li><a href="#ta-applications">3.5 Application Tracker</a></li>
+      <li><a href="#ta-ai">3.6 AI Assistant (TA)</a></li>
+    </ul>
+  </li>
+  <li><a href="#mo">Module Organiser (MO)</a>
+    <ul>
+      <li><a href="#mo-dashboard">4.1 Dashboard</a></li>
+      <li><a href="#mo-job-mgmt">4.2 Job Management</a></li>
+      <li><a href="#mo-applicants">4.3 Applicant List</a></li>
+      <li><a href="#mo-review">4.4 Candidate Review</a></li>
+      <li><a href="#mo-ai">4.5 AI Assistant (MO)</a></li>
+    </ul>
+  </li>
+  <li><a href="#admin">Administrator (Admin)</a>
+    <ul>
+      <li><a href="#admin-dashboard">5.1 Dashboard</a></li>
+      <li><a href="#admin-users">5.2 User Management</a></li>
+      <li><a href="#admin-applications">5.3 Application Monitoring</a></li>
+      <li><a href="#admin-workload">5.4 Workload Monitoring</a></li>
+      <li><a href="#admin-ai">5.5 AI Assistant (Admin)</a></li>
+    </ul>
+  </li>
+  <li><a href="#global-ai">Global AI Assistant</a></li>
+  <li><a href="#limitations">Known Limitations</a></li>
+</ol>
+</div>
+
+<!-- ============ 1. GETTING STARTED ============ -->
+<h2 id="getting-started">1. Getting Started</h2>
+
+<h3>1.1 Demo Accounts</h3>
+<p>Three pre-configured accounts are available for demonstration. Each account has a different role with distinct permissions:</p>
+<table>
+  <tr><th>Role</th><th>Email</th><th>Password</th><th>Capabilities</th></tr>
+  <tr>
+    <td><span class="role-badge role-ta">TA</span></td>
+    <td><code>james@school.edu</code></td>
+    <td><code>Password123!</code></td>
+    <td>Browse jobs, apply, manage profile &amp; CV, track applications, AI job matching</td>
+  </tr>
+  <tr>
+    <td><span class="role-badge role-mo">MO</span></td>
+    <td><code>kevin.zhao@school.edu</code></td>
+    <td><code>Password123!</code></td>
+    <td>Create/edit jobs, review applicants, view CVs, select/reject candidates, AI summaries</td>
+  </tr>
+  <tr>
+    <td><span class="role-badge role-admin">Admin</span></td>
+    <td><code>admin.chen@school.edu</code></td>
+    <td><code>Password123!</code></td>
+    <td>Monitor users, applications &amp; workload, AI risk analysis, system-wide oversight</td>
+  </tr>
+</table>
+
+<div class="tip">
+<strong>Tip:</strong> Use a separate browser window or incognito tab for each role during the demo to avoid session conflicts.
+</div>
+
+<h3>1.2 System Requirements</h3>
+<table>
+  <tr><th>Component</th><th>Requirement</th></tr>
+  <tr><td>Java</td><td>JDK 17 or higher</td></tr>
+  <tr><td>Servlet Container</td><td>Apache Tomcat 10.1+</td></tr>
+  <tr><td>Browser</td><td>Chrome 90+, Firefox 90+, Edge 90+, or Safari 15+</td></tr>
+  <tr><td>Deployment</td><td>Place <code>ta-recruitment-system.war</code> in Tomcat <code>webapps/</code></td></tr>
+  <tr><td>Access URL</td><td><code>http://localhost:8888/ta-recruitment-system/pages/login</code></td></tr>
+  <tr><td>AI Features</td><td>Requires ZhipuAI API key configured in Tomcat <code>setenv.bat</code></td></tr>
+</table>
+
+<h3>1.3 Data Storage</h3>
+<p>The system persists all data as JSON files under the <code>data/</code> directory. No external database is required. Data is loaded at startup and written back after every mutation.</p>
+
+<!-- ============ 2. LOGIN & REGISTER ============ -->
+<h2 id="login">2. Login &amp; Registration</h2>
+
+<h3 id="login-page">2.1 Login Page</h3>
+<p>All users access the system through the Login page. This is the entry point for the entire application:</p>
+<ol>
+  <li>Select your <strong>role</strong> from the dropdown (<strong>TA / MO / Admin</strong>) — this is required and validated on the server</li>
+  <li>Enter your registered <strong>email</strong> address</li>
+  <li>Enter your <strong>password</strong></li>
+  <li>Click <strong>Sign In</strong></li>
+</ol>
+<p>The system validates the role-email-password combination and redirects to the role-specific dashboard on success. Incorrect credentials display an error message without revealing which field was wrong.</p>
+<img src="screenshots/login-page.png" alt="Login Page">
+
+<h3 id="register-page">2.2 Registration Page</h3>
+<p>New users (primarily Teaching Assistants) can create an account via the Register page. Navigate from the Login page by clicking the registration link:</p>
+<ol>
+  <li>Fill in <strong>all required fields</strong>: name, email, password, skills, major, and contact information</li>
+  <li>Select <strong>TA</strong> as the role (MO and Admin accounts are pre-created by the system administrator)</li>
+  <li>Click <strong>Register</strong> to submit</li>
+</ol>
+<p>Email addresses must be unique across the system. If the email is already registered, you will see a validation error. After successful registration, you are redirected to the Login page to sign in.</p>
+<img src="screenshots/register-page.png" alt="Registration Page">
+
+<!-- ============ 3. TA ============ -->
+<h2 id="ta">3. Teaching Assistant (TA)</h2>
+<p>The TA role is designed for students applying to Teaching Assistant positions. Key capabilities: browse open jobs, submit applications, manage your profile and CV, track application statuses, and receive AI-powered job recommendations.</p>
+
+<h3 id="ta-dashboard">3.1 TA Dashboard</h3>
+<p>After login, the TA dashboard provides an at-a-glance overview of your recruitment status with four summary cards:</p>
+<ul>
+  <li><strong>Open Jobs</strong> — number of currently open TA positions you can apply for</li>
+  <li><strong>Submitted Applications</strong> — total applications you have sent</li>
+  <li><strong>Pending Review</strong> — applications awaiting MO decision</li>
+  <li><strong>Selected</strong> — applications where you have been accepted</li>
+</ul>
+<p>Below the summary cards, the dashboard displays your <strong>Latest Applications</strong> (most recent 5, with status badges) and <strong>AI-Recommended Jobs</strong> (personalized suggestions based on your profile skills).</p>
+<img src="screenshots/ta-dashboard_1.png" alt="TA Dashboard">
+
+<h3 id="ta-profile">3.2 My Profile &amp; CV Management</h3>
+<p>Open <em>My Profile</em> from the navigation bar to manage your personal information and curriculum vitae:</p>
+<ul>
+  <li><strong>Edit Profile Fields</strong> — update your name, email, skills, major, and contact details at any time</li>
+  <li><strong>Upload CV</strong> — supported formats: PDF, DOC, DOCX; maximum file size: 5 MB</li>
+  <li><strong>View CV</strong> — opens your uploaded CV in a new browser tab for preview</li>
+  <li><strong>Remove CV</strong> — deletes the current CV file so you can upload a new one</li>
+</ul>
+<p>Your CV is a critical part of your application — MOs review it when making selection decisions.</p>
+<img src="screenshots/ta-profile.png" alt="TA Profile Page">
+
+<h3 id="ta-job-board">3.3 Job Board</h3>
+<p>Open <em>Job Board</em> to browse all open TA positions across modules:</p>
+<ul>
+  <li><strong>Search</strong> — filter jobs by keyword (matches title, module name, required skills, and description)</li>
+  <li><strong>Module Filter</strong> — narrow results to a specific module</li>
+  <li><strong>Job Cards</strong> — each card shows the module name, job title, application deadline, required skills as tags, and weekly hours commitment</li>
+  <li><strong>Quick Apply</strong> — submit your application directly from the job card without opening the detail page</li>
+  <li><strong>Generate Matches</strong> — AI-powered button that ranks all open jobs by how well they match your profile skills (see <a href="#ta-ai">Section 3.6</a>)</li>
+</ul>
+<img src="screenshots/job-list_1.png" alt="Job Board">
+
+<h3 id="ta-job-detail">3.4 Job Detail &amp; Apply</h3>
+<p>Click any job card to open the <strong>Job Detail</strong> page, which displays the full information for that position:</p>
+<ul>
+  <li>Complete job description and responsibilities</li>
+  <li>Required skills (listed as individual tags for clarity)</li>
+  <li>Application deadline (applications close after this date)</li>
+  <li>Estimated weekly hours commitment</li>
+  <li>Module name and associated Module Organiser</li>
+</ul>
+<p>Click <strong>Apply Now</strong> to submit your application. The system enforces duplicate-application protection — you cannot apply twice to the same job. After applying, your application status is set to <strong>Pending</strong> and appears immediately in the Application Tracker.</p>
+<img src="screenshots/job-detail.png" alt="Job Detail Page">
+
+<h3 id="ta-applications">3.5 Application Tracker</h3>
+<p>Open <em>Applications</em> from the navigation bar to track all your submitted applications in one place:</p>
+<ul>
+  <li><strong>Status Filters</strong> — toggle between <strong>All / Pending / Selected / Rejected</strong> to focus on specific outcomes</li>
+  <li><strong>Keyword Search</strong> — search across job titles and module names</li>
+  <li><strong>Status Badges</strong> — each application card shows its current status with color-coded badges:
+    <ul>
+      <li><span style="color:#ca8a04;">●</span> <strong>Pending</strong> — awaiting MO review</li>
+      <li><span style="color:#16a34a;">●</span> <strong>Selected</strong> — accepted by the MO</li>
+      <li><span style="color:#dc2626;">●</span> <strong>Rejected</strong> — declined by the MO</li>
+    </ul>
+  </li>
+  <li>Status updates from MO decisions are reflected here in real time</li>
+</ul>
+<img src="screenshots/ta-applications.png" alt="TA Applications Page">
+
+<h3 id="ta-ai">3.6 AI Assistant (TA)</h3>
+<p>TA users have two AI entry points:</p>
+<ul>
+  <li><strong>Job Board — Generate Matches</strong>: Click the <em>Generate Matches</em> button on the Job Board page. The AI analyzes your profile skills against all open jobs and returns a ranked list of recommendations with match explanations. This helps you prioritize which jobs to apply for first.</li>
+  <li><strong>Top Bar — Global AI Assistant</strong>: Access the AI chat panel from the top navigation bar. Ask role-specific questions like:
+    <ul>
+      <li>"Which jobs should I apply for first?"</li>
+      <li>"What skills should I add to my profile?"</li>
+      <li>"Summarize my current application status"</li>
+    </ul>
+  </li>
+</ul>
+<div class="note">
+<strong>Important:</strong> AI output is advisory only. Always review job details in full before submitting an application. The AI does not apply on your behalf.
+</div>
+
+<!-- ============ 4. MO ============ -->
+<h2 id="mo">4. Module Organiser (MO)</h2>
+<p>The MO role is designed for module organizers who post TA positions and select candidates. Key capabilities: create and manage job postings, review applicants with CV access, generate AI candidate summaries, and make selection/rejection decisions with workload protection.</p>
+
+<h3 id="mo-dashboard">4.1 MO Dashboard</h3>
+<p>After login, the MO dashboard displays key recruitment metrics relevant to your modules:</p>
+<ul>
+  <li><strong>Active Jobs</strong> — number of open and active TA positions you have posted</li>
+  <li><strong>Total Applicants</strong> — cumulative applications received across all your jobs</li>
+  <li><strong>Pending Reviews</strong> — applications still awaiting your decision</li>
+  <li><strong>Selected</strong> — total number of TAs you have accepted</li>
+  <li><strong>Near Deadline Jobs</strong> — a warning list of jobs with approaching deadlines that still need attention</li>
+</ul>
+<img src="screenshots/mo-dashboard.png" alt="MO Dashboard">
+
+<h3 id="mo-job-mgmt">4.2 Job Management</h3>
+<p>Open <em>Job Management</em> from the navigation bar to create, edit, and manage your TA positions:</p>
+<ul>
+  <li><strong>Create Job</strong> — click the <em>New Job</em> button and fill in:
+    <ul>
+      <li>Job title (e.g., "Software Engineering Lab TA")</li>
+      <li>Module name (select from your assigned modules)</li>
+      <li>Required skills (comma-separated, displayed as tags)</li>
+      <li>Full job description and responsibilities</li>
+      <li>Application deadline date</li>
+      <li>Weekly hours commitment (used for workload calculation)</li>
+    </ul>
+  </li>
+  <li><strong>Edit Job</strong> — modify any field of an existing open job posting</li>
+  <li><strong>Filter &amp; Search</strong> — search jobs by keyword and filter by status (Open / Closed)</li>
+  <li><strong>View Applicants</strong> — click the <em>Applicants</em> button on any job card to see who has applied (see <a href="#mo-applicants">Section 4.3</a>)</li>
+</ul>
+<img src="screenshots/mo-job-management.png" alt="MO Job Management">
+
+<h3 id="mo-applicants">4.3 Applicant List</h3>
+<p>Open <em>Applicants</em> from the navigation bar, or click the <em>Applicants</em> button on any job card. This view lists all candidates who have applied to your jobs:</p>
+<ul>
+  <li><strong>Filter by Job</strong> — select a specific job posting to view its applicants</li>
+  <li><strong>Filter by Status</strong> — toggle between All / Pending / Selected / Rejected</li>
+  <li><strong>Keyword Search</strong> — search candidates by name, skills, or email</li>
+  <li><strong>Applicant Cards</strong> — each card shows the candidate name, applied job, application date, and current status badge</li>
+  <li><strong>Open Review</strong> — click any applicant to enter the full review page (see <a href="#mo-review">Section 4.4</a>)</li>
+</ul>
+<img src="screenshots/mo-applicants.png" alt="MO Applicants List">
+
+<h3 id="mo-review">4.4 Candidate Review</h3>
+<p>The Review page is the core MO workflow for evaluating a single candidate. For each applicant you can:</p>
+<ul>
+  <li><strong>View Profile</strong> — read the candidate's full profile: name, email, skills, major, and contact information</li>
+  <li><strong>View CV</strong> — open the candidate's uploaded CV file in a new tab for detailed review</li>
+  <li><strong>Generate AI Summary</strong> — click <em>Generate Summary</em> to produce an AI candidate brief (see <a href="#mo-ai">Section 4.5</a>)</li>
+  <li><strong>Write Review Note</strong> — add a private note documenting your assessment (visible only to MOs and Admins)</li>
+  <li><strong>Select Candidate</strong> — accept the candidate by clicking <em>Select</em></li>
+  <li><strong>Reject Candidate</strong> — decline the candidate by clicking <em>Reject</em></li>
+</ul>
+<div class="note">
+<strong>Workload Protection:</strong> The system automatically checks the candidate's total assigned weekly hours before allowing selection. If accepting this TA would push their total hours above the safe threshold, selection is blocked with a clear warning message. This prevents any single TA from being over-assigned across multiple modules.
+</div>
+<img src="screenshots/mo-review.png" alt="MO Candidate Review Page">
+
+<h3 id="mo-ai">4.5 AI Assistant (MO)</h3>
+<p>MO users have two AI access points:</p>
+<ul>
+  <li><strong>Review Page — Generate Summary</strong>: On the candidate review page, click <em>Generate Summary</em>. The AI produces a structured candidate brief covering:
+    <ul>
+      <li><strong>Evidence</strong> — how the candidate's skills and CV align with the job requirements</li>
+      <li><strong>Skill Gaps</strong> — required skills not found in the candidate's profile</li>
+      <li><strong>Suggested Questions</strong> — potential follow-up questions for an interview</li>
+    </ul>
+  </li>
+  <li><strong>Top Bar — Global AI Assistant</strong>: Ask questions like:
+    <ul>
+      <li>"Which candidate evidence should I verify?"</li>
+      <li>"Summarize pending reviews across my jobs"</li>
+      <li>"Which jobs have the most applicants?"</li>
+    </ul>
+  </li>
+</ul>
+<div class="note">
+<strong>Important:</strong> The AI summary is a reference tool, not a decision maker. The final selection or rejection decision must be made by you based on your professional judgment.
+</div>
+
+<!-- ============ 5. ADMIN ============ -->
+<h2 id="admin">5. Administrator (Admin)</h2>
+<p>The Admin role provides system-wide oversight and monitoring. Admins do not create jobs or make selection decisions — they monitor user activity, application flows, and workload distribution across the entire system.</p>
+
+<h3 id="admin-dashboard">5.1 Admin Dashboard</h3>
+<p>The Admin dashboard provides a high-level system overview with key metrics:</p>
+<ul>
+  <li><strong>Total Users</strong> — count of all registered users across all roles</li>
+  <li><strong>Open Jobs</strong> — total open TA positions system-wide</li>
+  <li><strong>Total Applications</strong> — all applications submitted across the system</li>
+  <li><strong>Overload Count</strong> — number of TAs flagged with workload warnings</li>
+  <li><strong>Recent Applications</strong> — latest 10 applications with role, job, and status information</li>
+  <li><strong>Workload Alerts</strong> — highlighted TAs with Warning or Overload risk levels</li>
+</ul>
+<img src="screenshots/admin-dashboard.png" alt="Admin Dashboard">
+
+<h3 id="admin-users">5.2 User Management</h3>
+<p>Open <em>Users</em> from the navigation bar to view all registered users in the system:</p>
+<ul>
+  <li><strong>Role Filter</strong> — filter the user list by <strong>TA / MO / Admin</strong> to focus on a specific role</li>
+  <li><strong>Keyword Search</strong> — search users by name or email address</li>
+  <li><strong>User Cards</strong> — each card displays the user's name, email, role badge, major (for TAs), and registration date</li>
+</ul>
+<p>This view is read-only for the baseline scope. User creation and deletion are managed through the registration flow and backend data respectively.</p>
+<img src="screenshots/admin-users.png" alt="Admin User Management">
+
+<h3 id="admin-applications">5.3 Application Monitoring</h3>
+<p>Open <em>Applications</em> to monitor all recruitment records globally across every module and role:</p>
+<ul>
+  <li><strong>Status Filter</strong> — filter by Pending / Selected / Rejected to audit specific workflow stages</li>
+  <li><strong>Module Filter</strong> — narrow to applications for a specific module</li>
+  <li><strong>Keyword Search</strong> — search by candidate name, job title, or module</li>
+  <li><strong>Full Visibility</strong> — unlike TA and MO views, the Admin sees <em>all</em> applications including their associated MO review notes</li>
+</ul>
+<img src="screenshots/admin-applications.png" alt="Admin Application Monitoring">
+
+<h3 id="admin-workload">5.4 Workload Monitoring</h3>
+<p>Open <em>Workload</em> to inspect TA assignment distribution and identify potential over-assignment risks:</p>
+<ul>
+  <li><strong>Risk Level Filter</strong> — filter TAs by workload risk:
+    <ul>
+      <li><span style="color:#f59e0b;">●</span> <strong>Warning</strong> — approaching the workload threshold</li>
+      <li><span style="color:#dc2626;">●</span> <strong>Overload</strong> — exceeding the safe workload limit</li>
+    </ul>
+  </li>
+  <li><strong>Workload Cards</strong> — each card shows a TA's name, number of selected modules, total weekly hours, and risk badge</li>
+  <li><strong>Generate Risk Analysis</strong> — click to produce an AI-driven operational risk assessment (see <a href="#admin-ai">Section 5.5</a>)</li>
+</ul>
+<img src="screenshots/admin-workload.png" alt="Admin Workload Monitoring">
+
+<h3 id="admin-ai">5.5 AI Assistant (Admin)</h3>
+<p>Admin users have two AI entry points:</p>
+<ul>
+  <li><strong>Workload Page — Analyze Risk</strong>: Click <em>Generate Risk Analysis</em> on the Workload page. The AI evaluates the current TA assignment distribution and produces a structured risk assessment identifying:
+    <ul>
+      <li>TAs at or near the overload threshold</li>
+      <li>Modules with uneven TA distribution</li>
+      <li>Potential operational bottlenecks</li>
+    </ul>
+  </li>
+  <li><strong>Top Bar — Global AI Assistant</strong>: Ask system-wide questions like:
+    <ul>
+      <li>"Who has workload risk?"</li>
+      <li>"Show me modules without enough TAs"</li>
+      <li>"Summarize all pending applications"</li>
+    </ul>
+  </li>
+</ul>
+
+<!-- ============ 6. GLOBAL AI ============ -->
+<h2 id="global-ai">6. Global AI Assistant</h2>
+<p>The <strong>AI Assistant</strong> button is available in the top navigation bar for all logged-in users. This is a role-aware, general-purpose chat interface powered by ZhipuAI GLM:</p>
+<ol>
+  <li>Click the <strong>AI Assistant</strong> button in the top bar to open the chat panel</li>
+  <li>Type a question relevant to your role and the current system state</li>
+  <li>The AI responds with a <strong>structured answer card</strong> containing:
+    <ul>
+      <li>A direct answer to your question</li>
+      <li>Supporting context drawn from system data</li>
+      <li>Suggested next actions (manual steps you should take)</li>
+    </ul>
+  </li>
+  <li>Close the panel or ask follow-up questions as needed</li>
+</ol>
+<p>The assistant has context about your role, the current data state (jobs, applications, users), and can guide you to the right pages and actions.</p>
+
+<div class="tip">
+<strong>Example Prompts by Role:</strong>
+<table>
+  <tr><th>Role</th><th>Prompt</th></tr>
+  <tr><td><span class="role-badge role-ta">TA</span></td><td>"Which jobs should I apply for first?"</td></tr>
+  <tr><td><span class="role-badge role-ta">TA</span></td><td>"What skills should I add to my profile?"</td></tr>
+  <tr><td><span class="role-badge role-mo">MO</span></td><td>"Which candidate evidence should I verify?"</td></tr>
+  <tr><td><span class="role-badge role-mo">MO</span></td><td>"Which jobs have the most pending applicants?"</td></tr>
+  <tr><td><span class="role-badge role-admin">Admin</span></td><td>"Who has workload risk?"</td></tr>
+  <tr><td><span class="role-badge role-admin">Admin</span></td><td>"Which page should I use to review workload risk?"</td></tr>
+</table>
+</div>
+<img src="screenshots/ai-chat.png" alt="Global AI Assistant Chat Interface">
+
+<!-- ============ 7. LIMITATIONS ============ -->
+<h2 id="limitations">7. Known Limitations</h2>
+<ul>
+  <li><strong>JSON File Storage</strong> — data is persisted in local JSON files under <code>data/</code>, not in a production-grade database. Concurrent write conflicts are possible under heavy load.</li>
+  <li><strong>AI Output is Advisory</strong> — all AI-generated content (job matches, candidate summaries, risk analyses) is a reference tool. Human review and judgment remain required for all decisions.</li>
+  <li><strong>Desktop-First Design</strong> — the UI is optimized for desktop browsers (1200px+). Mobile and tablet layouts are not fully tested in this sprint.</li>
+  <li><strong>Single Session Per Browser</strong> — logging in as a different role in the same browser window replaces the existing session. Use incognito/private windows for simultaneous multi-role testing.</li>
+  <li><strong>CV Access Requires Session</strong> — CV file viewing is authenticated. Direct URL access without a valid session will be denied.</li>
+  <li><strong>No Email Notifications</strong> — status changes and application updates are reflected in-app only. No external email notifications are sent.</li>
+</ul>
+
+<hr>
+<p style="text-align:center; color:#71717a; margin-top:40px;">TA Recruitment System — Group 02 — EBU6304 Software Engineering — 2025/26</p>
+
+</body>
+</html>

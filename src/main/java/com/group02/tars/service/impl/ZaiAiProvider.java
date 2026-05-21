@@ -79,7 +79,6 @@ class ZaiAiProvider implements AiProvider {
         requestBody.put("stream", false);
         requestBody.put("temperature", 0.2);
         requestBody.put("max_tokens", Math.max(64, maxTokens));
-        requestBody.put("thinking", Map.of("type", "disabled"));
 
         HttpRequest request = HttpRequest.newBuilder(chatCompletionsUri())
             .timeout(Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS))

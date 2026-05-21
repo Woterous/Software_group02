@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * MO 服务接口 —— 定义MO端所有操作的方法签名：职位管理、申请人管理、审核决策。
+ */
 public interface MoService {
     Map<String, Object> dashboard(String moUserId) throws IOException;
 

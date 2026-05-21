@@ -1,3 +1,9 @@
+/**
+ * UI 工具库 —— 所有页面共享的组件和工具函数。
+ * <p>
+ * 提供的能力：Toast消息提示、确认弹窗、自定义下拉框、分页组件、侧边栏导航动画、登出按钮绑定。
+ * 初始化入口：UIKit.bindGlobalActions()，由 bootstrap.js 在所有页面启动时调用。
+ */
 (function () {
     let selectRuntimeReady = false;
 

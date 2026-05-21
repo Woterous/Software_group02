@@ -1,3 +1,10 @@
+/**
+ * 页面启动器 —— 所有页面的统一入口。
+ * <p>
+ * 信息流：DOMContentLoaded → 此处 → UIKit.bindGlobalActions() + 读body data-role/data-page → 调对应PageModules.xxx.init()
+ * <p>
+ * 执行顺序：①绑定全局UI组件 ②读取body上的data-role和data-page属性 ③调用对应页面的初始化函数。
+ */
 window.PageModules = window.PageModules || {};
 
 (function () {

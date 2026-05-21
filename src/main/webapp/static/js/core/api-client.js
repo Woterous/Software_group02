@@ -1,3 +1,13 @@
+/**
+ * API请求封装层 —— 前端和后端之间的衔接点。
+ * <p>
+ * 信息流位置：页面JS → ApiClient → HTTP请求 → Tomcat → Servlet → ... → 返回JSON → 页面JS
+ * <p>
+ * 核心机制：通过 TARS_CONFIG.dataSource 切换 Mock/API 双模式。
+ *   "mock" → 调 MockEngine（localStorage模拟），不走网络
+ *   "api"  → 发 fetch HTTP 请求到 Java 后端
+ * 每个方法的结构完全一致：if(mock) return fromMock(...) else return fetchJson(...)
+ */
 (function () {
     const cfg = window.TARS_CONFIG;
 

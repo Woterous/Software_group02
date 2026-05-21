@@ -13,6 +13,14 @@ import java.util.Map;
  * Route-only page controller for Sprint 2 frontend-first workflow.
  * Backend business logic is intentionally deferred.
  */
+/**
+ * JSP 页面路由 —— 所有 /pages/* 请求由此 Servlet 转发到对应 JSP 文件。
+ * <p>
+ * 信息流：浏览器 → 此处查ROUTES表 → forward到JSP → JSP渲染HTML → 返回浏览器。
+ * <p>
+ * 不处理业务逻辑，只做页面跳转。同时还向JSP传递三个属性：
+ * appRole（角色）、appPage（当前页标记，侧边栏高亮用）、appRoute（当前路径）。
+ */
 public class PageRouterServlet extends HttpServlet {
 
     private static final Map<String, String> ROUTES = new HashMap<>();

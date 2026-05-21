@@ -1,3 +1,11 @@
+/**
+ * 登录和注册页面的交互逻辑。
+ * <p>
+ * 信息流位置：用户填表单 → 此处收集数据 → ApiClient → HTTP → Servlet → ... → 返回JSON → 此处处理结果
+ * <p>
+ * 注册信息流：initRegister() 绑定表单submit → formToObject()收集数据 → ApiClient.authRegister()发请求 → toast提示结果 → 跳转登录页
+ * 登录信息流：initLogin() 绑定表单submit → ApiClient.authLogin() → session存储 → 跳转角色仪表盘
+ */
 window.PageModules = window.PageModules || {};
 window.PageModules.public = window.PageModules.public || {};
 

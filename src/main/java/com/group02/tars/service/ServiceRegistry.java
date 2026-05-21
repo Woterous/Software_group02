@@ -13,6 +13,15 @@ import jakarta.servlet.ServletContext;
 
 import java.io.IOException;
 
+/**
+ * 服务注册中心 —— Servlet 和 Service 之间的连接点（"电话簿"）。
+ * <p>
+ * 信息流位置：启动时创建所有Service → Servlet通过它找到需要的Service
+ * <p>
+ * 为什么需要它：避免在每个Servlet里new Service导致混乱，
+ * 全局只创建一份Service实例，所有Servlet共享。
+ * 创建时机：BaseApiServlet.init() 调用 ServiceRegistry.from()（单例）。
+ */
 public class ServiceRegistry {
 
     private static final String REGISTRY_KEY = ServiceRegistry.class.getName() + ".INSTANCE";
@@ -26,6 +35,10 @@ public class ServiceRegistry {
     private final CvAccessService cvAccessService;
     private final AiAssistantService aiAssistantService;
 
+    /**
+     * 构造时创建所有Service和底层的FileStorage。
+     * 每个Service都拿到同一个storage实例，保证数据一致性。
+     */
     private ServiceRegistry(ServletContext context) throws IOException {
         this.storage = new JsonFileStorage(context);
         this.userService = new UserServiceImpl(storage);
@@ -37,6 +50,10 @@ public class ServiceRegistry {
         this.aiAssistantService = new AiAssistantServiceImpl(storage);
     }
 
+    /**
+     * 获取全局唯一的ServiceRegistry实例（单例模式，用ServletContext做锁）。
+     * 第一次调用时创建并缓存，之后直接返回已创建的实例。
+     */
     public static ServiceRegistry from(ServletContext context) throws IOException {
         synchronized (context) {
             Object found = context.getAttribute(REGISTRY_KEY);

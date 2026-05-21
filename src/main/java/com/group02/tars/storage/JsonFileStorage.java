@@ -20,6 +20,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * JSON文件存储实现 —— 整个系统的数据最终落在这里。
+ * <p>
+ * 信息流位置：ServiceImpl → FileStorage接口 → 此处 → 磁盘JSON文件
+ * <p>
+ * 数据文件：data/users.json、data/jobs.json、data/applications.json
+ * 每次读写整个文件（适合课程规模），synchronized保证多线程安全。
+ */
 public class JsonFileStorage implements FileStorage {
 
     private static final TypeReference<List<User>> USER_LIST_TYPE = new TypeReference<>() {};
@@ -32,6 +40,10 @@ public class JsonFileStorage implements FileStorage {
     private final Path applicationsFile;
     private final Object lock = new Object();
 
+    /**
+     * 构造函数 —— 确定数据文件路径并初始化。
+     * 数据目录优先级：系统属性tars.data.dir → 环境变量TARS_DATA_DIR → 自动检测项目根目录下的data/
+     */
     public JsonFileStorage(ServletContext context) throws IOException {
         this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
         Path dataDir = DataDirectoryResolver.resolveDataDir(context);
@@ -45,6 +57,9 @@ public class JsonFileStorage implements FileStorage {
         bootstrapIfMissing();
     }
 
+    /**
+     * 从 data/users.json 读取所有用户，文件不存在或为空时返回空列表。
+     */
     @Override
     public List<User> loadUsers() throws IOException {
         synchronized (lock) {
@@ -52,6 +67,10 @@ public class JsonFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * 将整个用户列表序列化成 JSON，写入 data/users.json。
+     * synchronized 防止多个线程同时写入导致数据损坏。
+     */
     @Override
     public void saveUsers(List<User> users) throws IOException {
         synchronized (lock) {

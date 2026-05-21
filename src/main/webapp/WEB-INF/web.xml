@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tomcat 部署描述符 —— 全站 URL 映射配置。
+
+  信息流位置：浏览器发请求 → Tomcat读取此文件 → 匹配 URL 模式 → 转发到对应Servlet
+
+  前端请求地址              → Servlet              作用
+  /pages/*                 → PageRouterServlet     JSP页面跳转
+  /api/v1/auth/*           → AuthApiServlet        注册、登录、登出、当前用户
+  /api/v1/ta/*             → TaApiServlet           TA所有操作（仪表盘、申请、个人信息）
+  /api/v1/mo/*             → MoApiServlet           MO所有操作（职位管理、审核决策）
+  /api/v1/admin/*          → AdminApiServlet        Admin所有操作（全局视图、工作量）
+  /api/v1/ai/*             → AiApiServlet           AI助手（推荐、摘要、风险分析、聊天）
+  /api/v1/files/cv/*       → CvFileServlet           CV文件查看（带权限控制）
+-->
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"

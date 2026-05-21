@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Admin 服务接口 —— 定义 Admin 端全局视图和监控相关操作的方法签名。
+ */
 public interface AdminService {
     Map<String, Object> dashboard() throws IOException;
 

@@ -4,6 +4,10 @@ import com.group02.tars.entity.User;
 
 import java.io.IOException;
 
+/**
+ * 用户服务接口 —— 定义用户相关操作的方法签名，由 UserServiceImpl 实现。
+ * 上层 Servlet 只依赖这个接口，不直接依赖实现类。
+ */
 public interface UserService {
     User register(String name, String email, String password, String role, String skillsCsv, String cvPath) throws IOException, ServiceException;
 

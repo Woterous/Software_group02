@@ -7,6 +7,12 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 数据目录解析器 —— 确定数据文件的存储位置（data/ 在哪个目录下）。
+ * <p>
+ * 优先级：系统属性 tars.data.dir → 环境变量 TARS_DATA_DIR → web.xml context-param → 自动检测项目根目录
+ * 自动检测逻辑：从当前目录向上查找 pom.xml 和 src/main，找到则为项目根目录。
+ */
 public final class DataDirectoryResolver {
 
     public static final String DATA_DIR_SYSTEM_PROPERTY = "tars.data.dir";

@@ -23,6 +23,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * AI 助手服务实现 —— 提供职位推荐、候选人摘要、风险分析、自由对话。
+ * <p>
+ * 信息流：AiApiServlet → AiAssistantService接口 → 此处 → FileStorage(读数据) + AiProvider(调模型)
+ * <p>
+ * 双模工作机制：AI API Key未配置时用内置规则引擎产出确定性fallback结果（modelView）。
+ * AI可用时额外调用Z.AI模型，结果解析后覆盖modelView。前端无感知，统一消费modelView字段。
+ */
 public class AiAssistantServiceImpl implements AiAssistantService {
     private static final int OVERLOAD_HOURS = 28;
     private static final int WARNING_HOURS = 20;

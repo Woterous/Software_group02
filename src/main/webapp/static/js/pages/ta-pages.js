@@ -1,3 +1,11 @@
+/**
+ * TA 端所有页面的初始化函数 —— 每个页面一个 init 函数，注册到 PageModules.ta。
+ * <p>
+ * 信息流：bootstrap.js → PageModules.ta.<page>() → ApiClient → HTTP → Servlet → ...
+ * <p>
+ * 页面列表：dashboard/profile/jobs/job-detail/applications
+ * 每个 init 函数做：验证登录态 → 调 ApiClient 拉数据 → 填 DOM → 绑事件。
+ */
 window.PageModules = window.PageModules || {};
 window.PageModules.ta = window.PageModules.ta || {};
 

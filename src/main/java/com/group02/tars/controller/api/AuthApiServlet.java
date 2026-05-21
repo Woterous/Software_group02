@@ -24,6 +24,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 认证模块的 HTTP 入口 —— 所有 /api/v1/auth/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流位置：浏览器 → web.xml → AuthApiServlet → Service → FileStorage → JSON文件
+ * <p>
+ * 角色：只负责接请求、解析参数、调 Service、返回 JSON，不碰业务逻辑和数据文件。
+ */
 @MultipartConfig(
     fileSizeThreshold = 16 * 1024,
     maxFileSize = 5 * 1024 * 1024,
@@ -34,6 +41,9 @@ public class AuthApiServlet extends BaseApiServlet {
     private static final List<String> CV_EXTENSIONS = List.of(".pdf", ".doc", ".docx");
     private static final String UPLOAD_PREFIX = "/uploads/";
 
+    /**
+     * GET 请求路由：按 URL 路径分发给对应处理方法
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (isPath(req, "/me")) {
@@ -43,6 +53,9 @@ public class AuthApiServlet extends BaseApiServlet {
         JsonResponse.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "SYSTEM_NOT_FOUND", "Endpoint not found.", req.getRequestURI());
     }
 
+    /**
+     * POST 请求路由：按 URL 路径分发给对应处理方法
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (isPath(req, "/login")) {
@@ -65,11 +78,19 @@ public class AuthApiServlet extends BaseApiServlet {
         JsonResponse.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "SYSTEM_NOT_FOUND", "Endpoint not found.", req.getRequestURI());
     }
 
+    /**
+     * 注册处理 —— 信息流全链路：浏览器表单 → 此处 → UserService → FileStorage → JSON文件。
+     * <p>
+     * 执行顺序：①解析前端数据 → ②有CV文件则存磁盘 → ③调Service层注册 → ④返回JSON给浏览器。
+     * 如果Service层抛出ServiceException（邮箱重复、格式错误等），内层catch会先删掉已上传的CV文件，再抛给外层catch返回JSON错误。
+     */
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            // ① 解析前端发来的请求数据（支持JSON和multipart/form-data两种格式）
             RegisterPayload payload = readRegisterPayload(req);
             String cvPath = payload.cvPath();
             Path uploadedCvFile = null;
+            // ② 如果有CV文件，先存到服务器磁盘 data/uploads/
             if (payload.cvFile != null && payload.cvFile.getSize() > 0) {
                 SavedCv savedCv = saveRegistrationCv(payload.cvFile);
                 cvPath = savedCv.cvPath();
@@ -77,6 +98,7 @@ public class AuthApiServlet extends BaseApiServlet {
             }
             User user;
             try {
+                // ③ 调用Service层：校验业务规则 → 组装User对象 → 写入users.json → 返回safeCopy
                 user = registry.userService().register(
                     payload.name(),
                     payload.email(),
@@ -86,16 +108,20 @@ public class AuthApiServlet extends BaseApiServlet {
                     cvPath
                 );
             } catch (Exception ex) {
+                // 注册失败时，回滚已上传的CV文件
                 deleteFileQuietly(uploadedCvFile);
                 throw ex;
             }
 
+            // ④ 构造成功响应，返回给浏览器
             Map<String, Object> data = new LinkedHashMap<>();
-            data.put("user", user);
+            data.put("user", user);   // user已过safeCopy()，不含password
             JsonResponse.writeSuccess(resp, HttpServletResponse.SC_CREATED, data, null);
         } catch (ServiceException ex) {
+            // Service层抛出的业务异常 → 转成JSON错误响应返回
             writeServiceError(req, resp, ex);
         } catch (Exception ex) {
+            // 其他意外异常 → 兜底处理
             writeUnknownError(req, resp, ex);
         }
     }

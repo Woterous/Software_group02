@@ -1,3 +1,8 @@
+/**
+ * MO 端所有页面的初始化函数 —— 注册到 PageModules.mo。
+ * <p>
+ * 页面列表：dashboard/jobs/applicants/review
+ */
 window.PageModules = window.PageModules || {};
 window.PageModules.mo = window.PageModules.mo || {};
 

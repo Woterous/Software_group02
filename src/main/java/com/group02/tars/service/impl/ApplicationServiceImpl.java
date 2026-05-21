@@ -16,6 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 申请服务实现 —— 处理 TA 端的申请提交、申请列表、仪表盘数据聚合。
+ * <p>
+ * 信息流：TaApiServlet → ApplicationService接口 → 此处 → FileStorage → applications.json
+ * <p>
+ * 核心规则：同一TA对同一职位只能申请一次（APPLICATION_DUPLICATE）。
+ * 仪表盘数据：从 applications.json 和 jobs.json 两个文件聚合出统计数字和推荐列表。
+ */
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final FileStorage storage;

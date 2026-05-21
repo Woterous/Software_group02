@@ -1,3 +1,8 @@
+/**
+ * Admin 端所有页面的初始化函数 —— 注册到 PageModules.admin。
+ * <p>
+ * 页面列表：dashboard/users/applications/workload
+ */
 window.PageModules = window.PageModules || {};
 window.PageModules.admin = window.PageModules.admin || {};
 

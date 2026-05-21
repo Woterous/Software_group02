@@ -11,6 +11,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Admin 端 API 入口 —— 所有 /api/v1/admin/* 请求由这个 Servlet 接收。
+ * <p>
+ * 信息流：AdminApiServlet → AdminService → FileStorage → JSON文件
+ * <p>
+ * 角色检查：所有方法都先 requireSessionUser("admin")，只允许 Admin 角色访问。
+ * 提供的能力：全局仪表盘、用户分页列表（可筛选）、申请全局视图、TA工作量统计（含风险等级）。
+ */
 public class AdminApiServlet extends BaseApiServlet {
 
     @Override

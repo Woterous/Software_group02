@@ -15,6 +15,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Admin 服务实现 —— 处理全局仪表盘、用户列表、申请视图、工作量监控。
+ * <p>
+ * 信息流：AdminApiServlet → AdminService接口 → 此处 → FileStorage → users + jobs + applications.json
+ * <p>
+ * 工作量风险算法：selected状态的申请 × 对应job的weeklyHours = TA总工时
+ *   0-19小时 → normal / 20-27小时 → warning / ≥28小时 → overload
+ */
 public class AdminServiceImpl implements AdminService {
 
     private final FileStorage storage;
