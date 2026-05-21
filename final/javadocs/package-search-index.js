@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.group02.tars.controller"},{"l":"com.group02.tars.controller.api"},{"l":"com.group02.tars.entity"},{"l":"com.group02.tars.service"},{"l":"com.group02.tars.service.impl"},{"l":"com.group02.tars.storage"},{"l":"com.group02.tars.util"}];updateSearchResults();
