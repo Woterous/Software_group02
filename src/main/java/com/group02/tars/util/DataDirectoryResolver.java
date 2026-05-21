@@ -8,15 +8,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 数据目录解析器 —— 确定数据文件的存储位置（data/ 在哪个目录下）。
- * <p>
- * 优先级：系统属性 tars.data.dir → 环境变量 TARS_DATA_DIR → web.xml context-param → 自动检测项目根目录
- * 自动检测逻辑：从当前目录向上查找 pom.xml 和 src/main，找到则为项目根目录。
+ * Resolves the filesystem locations used for persisted application data.
+ *
+ * <p>The data directory is chosen from the {@code tars.data.dir} system property,
+ * then {@code TARS_DATA_DIR}, then the servlet context parameter, and finally by
+ * detecting the project root from the current working directory.</p>
  */
 public final class DataDirectoryResolver {
 
+    /** System property used to override the data directory. */
     public static final String DATA_DIR_SYSTEM_PROPERTY = "tars.data.dir";
+    /** Environment variable used to override the data directory. */
     public static final String DATA_DIR_ENV_VAR = "TARS_DATA_DIR";
+    /** Servlet context parameter used to override the data directory. */
     public static final String DATA_DIR_CONTEXT_PARAM = "tars.data.dir";
 
     private static final String DEFAULT_DATA_DIR_NAME = "data";
@@ -25,6 +29,12 @@ public final class DataDirectoryResolver {
     private DataDirectoryResolver() {
     }
 
+    /**
+     * Resolves the directory that contains the JSON data files.
+     *
+     * @param context servlet context used for context-param lookup, or {@code null}
+     * @return normalized path to the data directory
+     */
     public static Path resolveDataDir(ServletContext context) {
         String configured = firstNonBlank(
             System.getProperty(DATA_DIR_SYSTEM_PROPERTY),
@@ -40,10 +50,22 @@ public final class DataDirectoryResolver {
         return projectRoot.resolve(DEFAULT_DATA_DIR_NAME).normalize();
     }
 
+    /**
+     * Resolves the upload directory below the active data directory.
+     *
+     * @param context servlet context used while resolving the data directory
+     * @return normalized path to the upload directory
+     */
     public static Path resolveUploadsDir(ServletContext context) {
         return resolveDataDir(context).resolve("uploads").normalize();
     }
 
+    /**
+     * Resolves the legacy {@code /WEB-INF/data} directory for migration support.
+     *
+     * @param context servlet context used to resolve the deployed web path
+     * @return normalized legacy data path, or {@code null} when it is unavailable
+     */
     public static Path resolveLegacyWebInfDataDir(ServletContext context) {
         if (context == null) {
             return null;

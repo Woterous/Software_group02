@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Service 层的工具类 —— 提供字符串处理、CSV拆分、ID生成、日期获取等通用方法。
- * 所有 ServiceImpl 共享使用，避免复制粘贴相同的代码。
+ * Shared helpers for service implementation classes.
  */
 final class ServiceSupport {
 

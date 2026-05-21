@@ -25,11 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 认证模块的 HTTP 入口 —— 所有 /api/v1/auth/* 请求由这个 Servlet 接收。
- * <p>
- * 信息流位置：浏览器 → web.xml → AuthApiServlet → Service → FileStorage → JSON文件
- * <p>
- * 角色：只负责接请求、解析参数、调 Service、返回 JSON，不碰业务逻辑和数据文件。
+ * API servlet for authentication endpoints under {@code /api/v1/auth/*}.
  */
 @MultipartConfig(
     fileSizeThreshold = 16 * 1024,
@@ -42,7 +38,11 @@ public class AuthApiServlet extends BaseApiServlet {
     private static final String UPLOAD_PREFIX = "/uploads/";
 
     /**
-     * GET 请求路由：按 URL 路径分发给对应处理方法
+     * Dispatches authentication read endpoints.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -54,7 +54,11 @@ public class AuthApiServlet extends BaseApiServlet {
     }
 
     /**
-     * POST 请求路由：按 URL 路径分发给对应处理方法
+     * Dispatches authentication create actions for login and registration.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -69,6 +73,13 @@ public class AuthApiServlet extends BaseApiServlet {
         JsonResponse.writeError(resp, HttpServletResponse.SC_NOT_FOUND, "SYSTEM_NOT_FOUND", "Endpoint not found.", req.getRequestURI());
     }
 
+    /**
+     * Dispatches authentication delete actions for logout.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (isPath(req, "/logout")) {
@@ -79,10 +90,11 @@ public class AuthApiServlet extends BaseApiServlet {
     }
 
     /**
-     * 注册处理 —— 信息流全链路：浏览器表单 → 此处 → UserService → FileStorage → JSON文件。
-     * <p>
-     * 执行顺序：①解析前端数据 → ②有CV文件则存磁盘 → ③调Service层注册 → ④返回JSON给浏览器。
-     * 如果Service层抛出ServiceException（邮箱重复、格式错误等），内层catch会先删掉已上传的CV文件，再抛给外层catch返回JSON错误。
+     * Handles registration from JSON or multipart form data.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if request parsing, file handling, or response writing fails
      */
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {

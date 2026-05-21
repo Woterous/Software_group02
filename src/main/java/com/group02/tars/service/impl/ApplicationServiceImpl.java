@@ -17,21 +17,30 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 申请服务实现 —— 处理 TA 端的申请提交、申请列表、仪表盘数据聚合。
- * <p>
- * 信息流：TaApiServlet → ApplicationService接口 → 此处 → FileStorage → applications.json
- * <p>
- * 核心规则：同一TA对同一职位只能申请一次（APPLICATION_DUPLICATE）。
- * 仪表盘数据：从 applications.json 和 jobs.json 两个文件聚合出统计数字和推荐列表。
+ * File-backed implementation of TA application submission, listing, and dashboard data.
  */
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to read users, jobs, and applications
+     */
     public ApplicationServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * Creates a pending application for a TA and job after lookup and duplicate checks.
+     *
+     * @param userId TA user id
+     * @param jobId job id being applied to
+     * @return created application
+     * @throws IOException if stored data cannot be read or written
+     * @throws ServiceException if required fields, role, lookup, or duplicate checks fail
+     */
     @Override
     public Application createApplication(String userId, String jobId) throws IOException, ServiceException {
         String normalizedUserId = ServiceSupport.normalize(userId);
@@ -81,6 +90,15 @@ public class ApplicationServiceImpl implements ApplicationService {
         return application;
     }
 
+    /**
+     * Lists applications submitted by one TA and joins job display fields.
+     *
+     * @param userId TA user id
+     * @param status optional application status filter
+     * @param keyword optional job title or module keyword
+     * @return application rows sorted by update date descending
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public List<Map<String, Object>> listMyApplications(String userId, String status, String keyword) throws IOException {
         String normalizedUserId = ServiceSupport.normalize(userId);
@@ -123,6 +141,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         return rows;
     }
 
+    /**
+     * Builds dashboard data for a TA from jobs and applications.
+     *
+     * @param userId TA user id
+     * @return dashboard metrics, latest applications, and open job recommendations
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public Map<String, Object> dashboard(String userId) throws IOException {
         String normalizedUserId = ServiceSupport.normalize(userId);

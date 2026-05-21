@@ -19,24 +19,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 所有API Servlet的父类 —— 提供公共能力：Session认证、角色校验、请求体解析、错误响应写入。
- * <p>
- * 信息流位置：每个API请求都会经过这里的 requireSessionUser() 做登录校验。
- * <p>
- * AuthApiServlet、TaApiServlet、MoApiServlet、AdminApiServlet 都继承这个类，
- * 不需要在每个Servlet里重复写session检查和错误处理。
+ * Base servlet for shared API concerns such as service lookup, session checks,
+ * JSON request parsing, and JSON error responses.
  */
 public abstract class BaseApiServlet extends HttpServlet {
 
+    /** Session attribute key that stores the authenticated user id. */
     protected static final String SESSION_USER_ID = "auth.userId";
+    /** Session attribute key that stores the authenticated role. */
     protected static final String SESSION_ROLE = "auth.role";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    /** Shared service registry initialized for API servlet subclasses. */
     protected ServiceRegistry registry;
 
     /**
-     * Servlet启动时执行一次：创建ServiceRegistry（全局唯一的Service电话簿）。
-     * 之后所有请求通过 registry.xxxService() 获取对应的Service。
+     * Initializes the shared service registry for API subclasses.
+     *
+     * @throws ServletException if the service registry cannot be initialized
      */
     @Override
     public void init() throws ServletException {
@@ -47,6 +47,14 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Writes a standard not-implemented error for endpoint groups not yet available.
+     *
+     * @param req current request
+     * @param resp current response
+     * @param scope endpoint group label
+     * @throws IOException if the JSON response cannot be written
+     */
     protected void notImplemented(HttpServletRequest req, HttpServletResponse resp, String scope) throws IOException {
         JsonResponse.writeError(
             resp,
@@ -57,6 +65,14 @@ public abstract class BaseApiServlet extends HttpServlet {
         );
     }
 
+    /**
+     * Reads the request body as a JSON object.
+     *
+     * @param req current request
+     * @return parsed JSON body, or an empty map when there is no body
+     * @throws IOException if the request stream cannot be read
+     * @throws ServiceException if the body is not a valid JSON object
+     */
     protected Map<String, Object> readBodyAsMap(HttpServletRequest req) throws IOException, ServiceException {
         try {
             if (req.getContentLength() <= 0 && req.getHeader("Transfer-Encoding") == null) {
@@ -72,11 +88,26 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads a trimmed string value from a parsed request body.
+     *
+     * @param body parsed request body
+     * @param key map key to read
+     * @return trimmed string value, or an empty string when absent
+     */
     protected String asString(Map<String, Object> body, String key) {
         Object value = body.get(key);
         return value == null ? "" : String.valueOf(value).trim();
     }
 
+    /**
+     * Parses an integer query parameter with a fallback value.
+     *
+     * @param req current request
+     * @param key query parameter name
+     * @param defaultValue value returned when the parameter is blank or invalid
+     * @return parsed integer or the default value
+     */
     protected int queryInt(HttpServletRequest req, String key, int defaultValue) {
         String raw = req.getParameter(key);
         if (raw == null || raw.isBlank()) return defaultValue;
@@ -88,12 +119,13 @@ public abstract class BaseApiServlet extends HttpServlet {
     }
 
     /**
-     * Session认证 + 角色校验 —— 每次API请求的守门人。
-     * <p>
-     * 检查流程：①从Session取userId和role → ②判空 → ③角色是否在允许列表中 → ④从文件确认用户存在。
-     * 任何一步失败都返回401或403 JSON错误，不会继续往下调Service。
-     * <p>
-     * @param allowedRoles 允许访问的角色列表，如 "ta","mo"；传空则只检查登录状态
+     * Validates the current session and optional role requirements.
+     *
+     * @param req current request
+     * @param resp current response
+     * @param allowedRoles roles allowed for the endpoint; empty means any logged-in role
+     * @return session user without password, or {@code null} after writing an error response
+     * @throws IOException if the JSON error response cannot be written
      */
     protected User requireSessionUser(HttpServletRequest req, HttpServletResponse resp, String... allowedRoles) throws IOException {
         HttpSession session = req.getSession(false);
@@ -125,10 +157,26 @@ public abstract class BaseApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Writes a service-layer error as the standard JSON error envelope.
+     *
+     * @param req current request
+     * @param resp current response
+     * @param ex service exception to serialize
+     * @throws IOException if the JSON response cannot be written
+     */
     protected void writeServiceError(HttpServletRequest req, HttpServletResponse resp, ServiceException ex) throws IOException {
         JsonResponse.writeError(resp, ex.httpStatus(), ex.code(), ex.getMessage(), req.getRequestURI());
     }
 
+    /**
+     * Writes an unexpected exception as a standard internal error response.
+     *
+     * @param req current request
+     * @param resp current response
+     * @param ex exception to report
+     * @throws IOException if the JSON response cannot be written
+     */
     protected void writeUnknownError(HttpServletRequest req, HttpServletResponse resp, Exception ex) throws IOException {
         JsonResponse.writeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SYSTEM_UNKNOWN", ex.getMessage(), req.getRequestURI());
     }

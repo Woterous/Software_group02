@@ -16,6 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link AiProvider} implementation for the Z.AI chat completions API.
+ */
 class ZaiAiProvider implements AiProvider {
     private static final String DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4";
     private static final String DEFAULT_MODEL = "glm-4.6v";
@@ -27,6 +30,9 @@ class ZaiAiProvider implements AiProvider {
     private final String model;
     private final String baseUrl;
 
+    /**
+     * Creates a provider from environment variables and default configuration.
+     */
     ZaiAiProvider() {
         this(
             firstNonBlank(System.getenv("TARS_AI_API_KEY"), System.getenv("AI_API_KEY")),
@@ -36,6 +42,14 @@ class ZaiAiProvider implements AiProvider {
         );
     }
 
+    /**
+     * Creates a provider with explicit configuration.
+     *
+     * @param apiKey API key used for bearer authentication
+     * @param model model name to request
+     * @param baseUrl API base URL or chat completions URL
+     * @param httpClient HTTP client used for provider requests
+     */
     ZaiAiProvider(String apiKey, String model, String baseUrl, HttpClient httpClient) {
         this.apiKey = normalize(apiKey);
         this.model = normalize(model).isBlank() ? DEFAULT_MODEL : normalize(model);
@@ -43,11 +57,21 @@ class ZaiAiProvider implements AiProvider {
         this.httpClient = httpClient;
     }
 
+    /**
+     * Reports whether the provider can make model calls.
+     *
+     * @return {@code true} when API key, model, and base URL are configured
+     */
     @Override
     public boolean isReady() {
         return !apiKey.isBlank() && !model.isBlank() && !baseUrl.isBlank();
     }
 
+    /**
+     * Returns provider status metadata for API responses.
+     *
+     * @return readiness and provider configuration metadata
+     */
     @Override
     public Map<String, Object> status() {
         Map<String, Object> status = new LinkedHashMap<>();
@@ -63,6 +87,16 @@ class ZaiAiProvider implements AiProvider {
         return status;
     }
 
+    /**
+     * Sends a text-only chat completion request.
+     *
+     * @param systemPrompt system instruction prompt
+     * @param userPrompt user task prompt
+     * @param maxTokens requested maximum output tokens
+     * @return provider completion result
+     * @throws IOException if JSON serialization or response parsing fails
+     * @throws ServiceException if provider configuration or response status is invalid
+     */
     @Override
     public AiProviderResult complete(String systemPrompt, String userPrompt, int maxTokens)
         throws IOException, ServiceException {
@@ -76,6 +110,17 @@ class ZaiAiProvider implements AiProvider {
         ), maxTokens);
     }
 
+    /**
+     * Sends a chat completion request with an optional file payload.
+     *
+     * @param systemPrompt system instruction prompt
+     * @param userPrompt user task prompt
+     * @param file optional file input
+     * @param maxTokens requested maximum output tokens
+     * @return provider completion result
+     * @throws IOException if JSON serialization or response parsing fails
+     * @throws ServiceException if provider configuration or response status is invalid
+     */
     @Override
     public AiProviderResult completeWithFile(String systemPrompt, String userPrompt, AiFileInput file, int maxTokens)
         throws IOException, ServiceException {

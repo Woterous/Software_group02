@@ -20,24 +20,29 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * MO 服务实现 —— 处理MO端所有业务逻辑：职位CRUD、申请人管理、审核决策。
- * <p>
- * 信息流：MoApiServlet → MoService接口 → 此处 → FileStorage → jobs.json + applications.json
- * <p>
- * 关键规则：
- * - 创建职位时验证截止日期（不能是过去日期）
- * - 选中申请时检查TA工作量上限（≥28小时/周则拒绝）
- * - 跨表操作：listApplicants 关联 applications + users + jobs 三个文件
+ * File-backed implementation of module-organizer job and applicant workflows.
  */
 public class MoServiceImpl implements MoService {
     private static final int MAX_SELECTED_WEEKLY_HOURS = 28;
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to read and write jobs and applications
+     */
     public MoServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * Builds dashboard metrics for jobs owned by one module organizer.
+     *
+     * @param moUserId module organizer user id
+     * @return dashboard metrics and near-deadline jobs
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public Map<String, Object> dashboard(String moUserId) throws IOException {
         List<Job> jobs = storage.loadJobs();
@@ -62,6 +67,15 @@ public class MoServiceImpl implements MoService {
         return data;
     }
 
+    /**
+     * Lists jobs owned by one module organizer.
+     *
+     * @param moUserId module organizer user id
+     * @param status optional job status filter
+     * @param keyword optional title or module keyword
+     * @return owned job rows with applicant counts
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public List<Map<String, Object>> listJobs(String moUserId, String status, String keyword) throws IOException {
         String statusNorm = safe(status);
@@ -93,6 +107,21 @@ public class MoServiceImpl implements MoService {
         return rows;
     }
 
+    /**
+     * Creates a job after validating required fields, status, deadline, and hours.
+     *
+     * @param moUserId module organizer user id
+     * @param title job title
+     * @param moduleName module name or code
+     * @param requiredSkills required skill text
+     * @param deadline deadline in {@code YYYY-MM-DD} form
+     * @param description job description
+     * @param status requested status
+     * @param weeklyHours requested weekly hours
+     * @return created job
+     * @throws IOException if stored job data cannot be read or written
+     * @throws ServiceException if validation fails
+     */
     @Override
     public Job createJob(String moUserId, String title, String moduleName, String requiredSkills, String deadline,
                          String description, String status, String weeklyHours) throws IOException, ServiceException {
@@ -114,6 +143,22 @@ public class MoServiceImpl implements MoService {
         return job;
     }
 
+    /**
+     * Updates a job owned by the requesting module organizer.
+     *
+     * @param moUserId module organizer user id
+     * @param jobId job id to update
+     * @param title optional replacement title
+     * @param moduleName optional replacement module name
+     * @param requiredSkills optional replacement required skills
+     * @param deadline optional replacement deadline
+     * @param description optional replacement description
+     * @param status optional replacement status
+     * @param weeklyHours optional replacement weekly hours
+     * @return updated job
+     * @throws IOException if stored job data cannot be read or written
+     * @throws ServiceException if the job is missing, forbidden, or invalid
+     */
     @Override
     public Job updateJob(String moUserId, String jobId, String title, String moduleName, String requiredSkills,
                          String deadline, String description, String status, String weeklyHours) throws IOException, ServiceException {
@@ -132,6 +177,17 @@ public class MoServiceImpl implements MoService {
         return job;
     }
 
+    /**
+     * Lists applicants for owned jobs and joins application, user, and job fields.
+     *
+     * @param moUserId module organizer user id
+     * @param jobId optional owned job id filter
+     * @param status optional application status filter
+     * @param keyword optional applicant, title, or module keyword
+     * @return applicant rows for the module organizer
+     * @throws IOException if stored data cannot be read
+     * @throws ServiceException if the requested job is not owned by the organizer
+     */
     @Override
     public List<Map<String, Object>> listApplicants(String moUserId, String jobId, String status, String keyword) throws IOException, ServiceException {
         String moId = safe(moUserId);
@@ -174,6 +230,15 @@ public class MoServiceImpl implements MoService {
         return rows;
     }
 
+    /**
+     * Returns review detail for an application associated with an owned job.
+     *
+     * @param moUserId module organizer user id
+     * @param applicationId application id to review
+     * @return application review detail row
+     * @throws IOException if stored data cannot be read
+     * @throws ServiceException if application or ownership checks fail
+     */
     @Override
     public Map<String, Object> reviewApplication(String moUserId, String applicationId) throws IOException, ServiceException {
         List<Application> applications = storage.loadApplications();
@@ -198,6 +263,17 @@ public class MoServiceImpl implements MoService {
         return row;
     }
 
+    /**
+     * Updates an owned application's decision and review note.
+     *
+     * @param moUserId module organizer user id
+     * @param applicationId application id to update
+     * @param status next status, expected to be {@code selected} or {@code rejected}
+     * @param reviewNote review note to store
+     * @return updated application
+     * @throws IOException if stored application data cannot be read or written
+     * @throws ServiceException if status, ownership, or workload checks fail
+     */
     @Override
     public Application updateApplicationStatus(String moUserId, String applicationId, String status, String reviewNote)
         throws IOException, ServiceException {

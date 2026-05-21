@@ -13,12 +13,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * 用户服务的核心实现 —— 所有关于用户的业务逻辑都在这里。
- * <p>
- * 信息流位置：AuthApiServlet → UserService接口 → 此处 → FileStorage → users.json
- * <p>
- * 角色：接收上层的原始数据，做业务校验和规则判断，通过后调FileStorage读写文件。
- * 不直接操作JSON、不关心HTTP请求/响应。
+ * File-backed implementation of registration, login, lookup, and TA profile updates.
  */
 public class UserServiceImpl implements UserService {
 
@@ -28,14 +23,27 @@ public class UserServiceImpl implements UserService {
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to read and write users
+     */
     public UserServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
     /**
-     * 注册 —— 信息流：AuthApiServlet → 此处 → FileStorage → users.json
-     * <p>
-     * 执行顺序：标准化输入 → 必填检查 → 邮箱格式验证 → 角色合法性 → 邮箱唯一性 → 分配ID → 组装对象 → 写入文件 → 返回safeCopy
+     * Registers a user after validation, email uniqueness checks, and id assignment.
+     *
+     * @param name display name
+     * @param email email address
+     * @param password password value
+     * @param role requested role, defaulted to {@code ta} when blank
+     * @param skillsCsv comma-separated skills
+     * @param cvPath optional CV path for TA users
+     * @return registered user without password
+     * @throws IOException if stored user data cannot be read or written
+     * @throws ServiceException if validation or uniqueness checks fail
      */
     @Override
     public User register(String name, String email, String password, String role, String skillsCsv, String cvPath) throws IOException, ServiceException {
@@ -85,6 +93,16 @@ public class UserServiceImpl implements UserService {
         return user.safeCopy();
     }
 
+    /**
+     * Authenticates a user by email, password, and role.
+     *
+     * @param email submitted email address
+     * @param password submitted password
+     * @param role submitted role
+     * @return matched user without password
+     * @throws IOException if stored user data cannot be read
+     * @throws ServiceException if credentials are missing or invalid
+     */
     @Override
     public User login(String email, String password, String role) throws IOException, ServiceException {
         String normalizedEmail = ServiceSupport.lower(email);
@@ -108,6 +126,14 @@ public class UserServiceImpl implements UserService {
         return matched.safeCopy();
     }
 
+    /**
+     * Finds a user by id.
+     *
+     * @param userId user id to resolve
+     * @return matching user without password
+     * @throws IOException if stored user data cannot be read
+     * @throws ServiceException if the user does not exist
+     */
     @Override
     public User findById(String userId) throws IOException, ServiceException {
         String normalizedUserId = ServiceSupport.normalize(userId);
@@ -121,6 +147,19 @@ public class UserServiceImpl implements UserService {
         return found.safeCopy();
     }
 
+    /**
+     * Updates editable TA profile fields.
+     *
+     * @param userId TA user id
+     * @param name replacement display name
+     * @param email replacement email address
+     * @param skillsCsv replacement comma-separated skills
+     * @param major replacement major text
+     * @param contact replacement contact text
+     * @return updated user without password
+     * @throws IOException if stored user data cannot be read or written
+     * @throws ServiceException if the user is missing, forbidden, or invalid
+     */
     @Override
     public User updateProfile(String userId, String name, String email, String skillsCsv, String major, String contact) throws IOException, ServiceException {
         List<User> users = storage.loadUsers();
@@ -159,6 +198,15 @@ public class UserServiceImpl implements UserService {
         return target.safeCopy();
     }
 
+    /**
+     * Updates the stored CV path for a TA user.
+     *
+     * @param userId TA user id
+     * @param cvPath replacement CV path
+     * @return stored CV path
+     * @throws IOException if stored user data cannot be read or written
+     * @throws ServiceException if the user is missing, forbidden, or the path is invalid
+     */
     @Override
     public String updateCvPath(String userId, String cvPath) throws IOException, ServiceException {
         List<User> users = storage.loadUsers();

@@ -27,12 +27,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * AI 助手服务实现 —— 提供职位推荐、候选人摘要、风险分析、自由对话。
- * <p>
- * 信息流：AiApiServlet → AiAssistantService接口 → 此处 → FileStorage(读数据) + AiProvider(调模型)
- * <p>
- * 双模工作机制：AI API Key未配置时用内置规则引擎产出确定性fallback结果（modelView）。
- * AI可用时额外调用Z.AI模型，结果解析后覆盖modelView。前端无感知，统一消费modelView字段。
+ * File-backed implementation of AI assistant recommendations, summaries, risk analysis, and chat.
+ *
+ * <p>When the provider is not configured, this class returns deterministic local
+ * views. When the provider is ready, it can enrich those views with model output.</p>
  */
 public class AiAssistantServiceImpl implements AiAssistantService {
     private static final int OVERLOAD_HOURS = 28;
@@ -55,10 +53,21 @@ public class AiAssistantServiceImpl implements AiAssistantService {
     private final Path uploadDir;
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Creates the service using the default AI provider and no upload directory.
+     *
+     * @param storage storage used to read users, jobs, and applications
+     */
     public AiAssistantServiceImpl(FileStorage storage) {
         this(storage, null, new ZaiAiProvider());
     }
 
+    /**
+     * Creates the service using the default AI provider and an upload directory.
+     *
+     * @param storage storage used to read users, jobs, and applications
+     * @param uploadDir directory used to read CV files for multimodal prompts
+     */
     public AiAssistantServiceImpl(FileStorage storage, Path uploadDir) {
         this(storage, uploadDir, new ZaiAiProvider());
     }
@@ -73,11 +82,24 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         this.provider = Objects.requireNonNull(provider);
     }
 
+    /**
+     * Returns provider readiness and configuration metadata.
+     *
+     * @return provider status map
+     */
     @Override
     public Map<String, Object> providerStatus() {
         return provider.status();
     }
 
+    /**
+     * Builds job recommendations for a TA from profile skills, applications, and open jobs.
+     *
+     * @param taUserId TA user id
+     * @return recommendation payload for the TA
+     * @throws IOException if stored data cannot be read
+     * @throws ServiceException if the user is missing or not a TA
+     */
     @Override
     public Map<String, Object> recommendJobsForTa(String taUserId) throws IOException, ServiceException {
         User ta = findUser(taUserId);
@@ -136,6 +158,15 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         return data;
     }
 
+    /**
+     * Summarizes a candidate application for the module organizer who owns the job.
+     *
+     * @param moUserId module organizer user id
+     * @param applicationId application id to summarize
+     * @return candidate summary payload
+     * @throws IOException if stored data or CV data cannot be read
+     * @throws ServiceException if lookup or ownership checks fail
+     */
     @Override
     public Map<String, Object> summarizeCandidateForMo(String moUserId, String applicationId)
         throws IOException, ServiceException {
@@ -184,6 +215,13 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         return data;
     }
 
+    /**
+     * Builds administrator workload and role-level risk analysis.
+     *
+     * @param riskLevel optional workload risk filter
+     * @return risk analysis payload
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public Map<String, Object> analyzeAdminRisk(String riskLevel) throws IOException {
         String filter = ServiceSupport.lower(riskLevel);
@@ -242,6 +280,17 @@ public class AiAssistantServiceImpl implements AiAssistantService {
         return data;
     }
 
+    /**
+     * Answers a role-aware assistant chat message using local context and the provider when available.
+     *
+     * @param userId current user id
+     * @param role current session role
+     * @param page current page identifier
+     * @param message user message
+     * @return chat response payload
+     * @throws IOException if stored data or provider data cannot be read
+     * @throws ServiceException if validation, lookup, or role checks fail
+     */
     @Override
     public Map<String, Object> chat(String userId, String role, String page, String message)
         throws IOException, ServiceException {

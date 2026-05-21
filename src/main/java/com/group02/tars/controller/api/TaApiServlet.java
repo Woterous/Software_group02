@@ -25,12 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * TA 端 API 入口 —— 所有 /api/v1/ta/* 请求由这个 Servlet 接收。
- * <p>
- * 信息流：TaApiServlet → Service → FileStorage → JSON文件
- * <p>
- * 角色检查：所有方法都先 requireSessionUser("ta")，只允许 TA 角色访问。
- * 提供的能力：仪表盘数据、个人信息管理、CV上传/替换/删除、职位浏览与申请、我的申请列表。
+ * API servlet for teaching-assistant endpoints under {@code /api/v1/ta/*}.
  */
 @MultipartConfig(
     fileSizeThreshold = 16 * 1024,
@@ -41,6 +36,13 @@ public class TaApiServlet extends BaseApiServlet {
     private static final List<String> CV_EXTENSIONS = List.of(".pdf", ".doc", ".docx");
     private static final String UPLOAD_PREFIX = "/uploads/";
 
+    /**
+     * Handles TA read endpoints for dashboard, profile, jobs, and applications.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User current = requireSessionUser(req, resp, "ta");
@@ -68,6 +70,13 @@ public class TaApiServlet extends BaseApiServlet {
         }
     }
 
+    /**
+     * Handles TA write actions for CV updates and job applications.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User current = requireSessionUser(req, resp, "ta");
@@ -103,6 +112,13 @@ public class TaApiServlet extends BaseApiServlet {
         }
     }
 
+    /**
+     * Handles TA profile updates.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User current = requireSessionUser(req, resp, "ta");
@@ -134,6 +150,13 @@ public class TaApiServlet extends BaseApiServlet {
         }
     }
 
+    /**
+     * Handles removal of the current TA's CV path and managed upload file.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User current = requireSessionUser(req, resp, "ta");
