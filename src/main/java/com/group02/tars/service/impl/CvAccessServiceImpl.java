@@ -16,21 +16,32 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * CV 访问控制实现 —— 判断谁有权限看谁的CV。
- * <p>
- * 信息流：CvFileServlet → CvAccessService接口 → 此处 → FileStorage
- * <p>
- * 权限矩阵：Admin → 全权限 / TA → 只能看自己的 / MO → 看申请了自己职位的人的 / 其他 → 拒绝
+ * File-backed implementation of CV file access checks.
  */
 public class CvAccessServiceImpl implements CvAccessService {
     private static final List<String> CV_EXTENSIONS = List.of(".pdf", ".doc", ".docx");
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to resolve CV owners and MO-owned jobs
+     */
     public CvAccessServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * Resolves CV metadata after validating the file name and requester permissions.
+     *
+     * @param requesterUserId current requester user id
+     * @param requesterRole current requester role
+     * @param fileName requested CV file name
+     * @return accessible CV metadata
+     * @throws IOException if stored data cannot be read
+     * @throws ServiceException if validation, lookup, or permission checks fail
+     */
     @Override
     public AccessibleCv resolveAccessibleCv(String requesterUserId, String requesterRole, String fileName)
         throws IOException, ServiceException {

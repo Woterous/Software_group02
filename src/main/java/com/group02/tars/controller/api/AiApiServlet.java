@@ -11,15 +11,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * AI 助手 API 入口 —— 所有 /api/v1/ai/* 请求由这个 Servlet 接收。
- * <p>
- * 信息流：AiApiServlet → AiAssistantService → FileStorage(读数据) + ZaiAiProvider(调模型)。
- * <p>
- * 提供的能力：AI提供商状态查询、自由聊天、TA职位推荐、MO候选人摘要、Admin风险分析。
- * AI API Key 未配置时返回规则引擎的确定性fallback结果，不影响核心功能。
+ * API servlet for AI assistant endpoints under {@code /api/v1/ai/*}.
  */
 public class AiApiServlet extends BaseApiServlet {
 
+    /**
+     * Handles the AI provider status endpoint.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User current = requireSessionUser(req, resp, "ta", "mo", "admin");
@@ -35,6 +37,13 @@ public class AiApiServlet extends BaseApiServlet {
         JsonResponse.writeSuccess(resp, HttpServletResponse.SC_OK, data, null);
     }
 
+    /**
+     * Dispatches AI assistant actions such as chat, recommendations, summaries, and risk analysis.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws IOException if a response cannot be written
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = normalizePath(req);

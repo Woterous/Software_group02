@@ -10,10 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * 统一 JSON 响应写入工具 —— 所有 API 返回给浏览器的格式都在这里定义。
- * <p>
- * 成功格式：{ "success": true,  "data": {...}, "meta": {...}, "error": null }
- * 失败格式：{ "success": false, "data": null,  "meta": {...}, "error": { "code":"...", "message":"..." } }
+ * Writes the common JSON envelope used by API servlets.
+ *
+ * <p>Successful responses include {@code success}, {@code data}, {@code meta}, and
+ * {@code error} fields. Error responses use the same envelope with {@code data}
+ * set to {@code null} and a structured {@code error} object.</p>
  */
 public final class JsonResponse {
 
@@ -22,6 +23,15 @@ public final class JsonResponse {
     private JsonResponse() {
     }
 
+    /**
+     * Writes a successful JSON response.
+     *
+     * @param resp servlet response to write to
+     * @param status HTTP status code to set
+     * @param data response payload, or {@code null}
+     * @param meta optional response metadata, or {@code null}
+     * @throws IOException if the response writer cannot be written
+     */
     public static void writeSuccess(HttpServletResponse resp, int status, Object data, Object meta) throws IOException {
         resp.setStatus(status);
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -35,10 +45,31 @@ public final class JsonResponse {
         MAPPER.writeValue(resp.getWriter(), payload);
     }
 
+    /**
+     * Writes an error JSON response without detail entries.
+     *
+     * @param resp servlet response to write to
+     * @param status HTTP status code to set
+     * @param code application-level error code
+     * @param message human-readable error message
+     * @param path request path to include in response metadata
+     * @throws IOException if the response writer cannot be written
+     */
     public static void writeError(HttpServletResponse resp, int status, String code, String message, String path) throws IOException {
         writeError(resp, status, code, message, path, List.of());
     }
 
+    /**
+     * Writes an error JSON response with optional detail entries.
+     *
+     * @param resp servlet response to write to
+     * @param status HTTP status code to set
+     * @param code application-level error code
+     * @param message human-readable error message
+     * @param path request path to include in response metadata
+     * @param details validation or diagnostic detail messages
+     * @throws IOException if the response writer cannot be written
+     */
     public static void writeError(
         HttpServletResponse resp,
         int status,

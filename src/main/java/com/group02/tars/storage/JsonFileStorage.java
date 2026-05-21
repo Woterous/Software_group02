@@ -21,12 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * JSON文件存储实现 —— 整个系统的数据最终落在这里。
- * <p>
- * 信息流位置：ServiceImpl → FileStorage接口 → 此处 → 磁盘JSON文件
- * <p>
- * 数据文件：data/users.json、data/jobs.json、data/applications.json
- * 每次读写整个文件（适合课程规模），synchronized保证多线程安全。
+ * File-based {@link FileStorage} implementation backed by JSON files.
+ *
+ * <p>The implementation reads and writes {@code users.json}, {@code jobs.json},
+ * and {@code applications.json} under the resolved data directory. Public load
+ * and save operations synchronize on a shared lock so each file operation is
+ * performed atomically within this storage instance.</p>
  */
 public class JsonFileStorage implements FileStorage {
 
@@ -41,8 +41,10 @@ public class JsonFileStorage implements FileStorage {
     private final Object lock = new Object();
 
     /**
-     * 构造函数 —— 确定数据文件路径并初始化。
-     * 数据目录优先级：系统属性tars.data.dir → 环境变量TARS_DATA_DIR → 自动检测项目根目录下的data/
+     * Creates storage using the data directory resolved for the servlet context.
+     *
+     * @param context servlet context used for data-directory resolution
+     * @throws IOException if directories or bootstrap files cannot be created
      */
     public JsonFileStorage(ServletContext context) throws IOException {
         this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -58,7 +60,10 @@ public class JsonFileStorage implements FileStorage {
     }
 
     /**
-     * 从 data/users.json 读取所有用户，文件不存在或为空时返回空列表。
+     * Loads users from {@code users.json}.
+     *
+     * @return stored users, or an empty list when the file is missing or empty
+     * @throws IOException if user data cannot be read
      */
     @Override
     public List<User> loadUsers() throws IOException {
@@ -68,8 +73,10 @@ public class JsonFileStorage implements FileStorage {
     }
 
     /**
-     * 将整个用户列表序列化成 JSON，写入 data/users.json。
-     * synchronized 防止多个线程同时写入导致数据损坏。
+     * Writes users to {@code users.json}.
+     *
+     * @param users complete user collection to persist
+     * @throws IOException if user data cannot be written
      */
     @Override
     public void saveUsers(List<User> users) throws IOException {
@@ -78,6 +85,12 @@ public class JsonFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Loads jobs from {@code jobs.json}.
+     *
+     * @return stored jobs, or an empty list when the file is missing or empty
+     * @throws IOException if job data cannot be read
+     */
     @Override
     public List<Job> loadJobs() throws IOException {
         synchronized (lock) {
@@ -85,6 +98,12 @@ public class JsonFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Writes jobs to {@code jobs.json}.
+     *
+     * @param jobs complete job collection to persist
+     * @throws IOException if job data cannot be written
+     */
     @Override
     public void saveJobs(List<Job> jobs) throws IOException {
         synchronized (lock) {
@@ -92,6 +111,12 @@ public class JsonFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Loads applications from {@code applications.json}.
+     *
+     * @return stored applications, or an empty list when the file is missing or empty
+     * @throws IOException if application data cannot be read
+     */
     @Override
     public List<Application> loadApplications() throws IOException {
         synchronized (lock) {
@@ -99,6 +124,12 @@ public class JsonFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * Writes applications to {@code applications.json}.
+     *
+     * @param applications complete application collection to persist
+     * @throws IOException if application data cannot be written
+     */
     @Override
     public void saveApplications(List<Application> applications) throws IOException {
         synchronized (lock) {

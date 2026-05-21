@@ -6,21 +6,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用户实体 —— 对应 users.json 文件中的一条记录，在各个层之间传递的数据载体。
- * safeCopy() 返回不含 password 的拷贝，用于返回给前端时脱敏。
+ * User record stored in {@code users.json} and passed between the API and service layers.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
+    /** Unique user identifier, such as {@code TA001}, {@code MO001}, or {@code AD001}. */
     public String userId;
+    /** Display name entered for the user. */
     public String name;
+    /** Email address used for authentication and profile display. */
     public String email;
+    /** Plain password value persisted by the current file-based storage implementation. */
     public String password;
+    /** User role, normally {@code ta}, {@code mo}, or {@code admin}. */
     public String role;
+    /** Profile skills used by matching and dashboard views. */
     public List<String> skills = new ArrayList<>();
+    /** Major or faculty-related profile text. */
     public String major;
+    /** Contact information shown in profile and review workflows. */
     public String contact;
+    /** CV path stored relative to the upload route, or blank when no CV is available. */
     public String cvPath;
 
+    /**
+     * Builds a copy of this user without the password field.
+     *
+     * @return a user copy safe to return from JSON API responses
+     */
     public User safeCopy() {
         User copy = new User();
         copy.userId = userId;

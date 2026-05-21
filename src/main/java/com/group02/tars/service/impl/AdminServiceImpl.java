@@ -16,21 +16,27 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Admin 服务实现 —— 处理全局仪表盘、用户列表、申请视图、工作量监控。
- * <p>
- * 信息流：AdminApiServlet → AdminService接口 → 此处 → FileStorage → users + jobs + applications.json
- * <p>
- * 工作量风险算法：selected状态的申请 × 对应job的weeklyHours = TA总工时
- *   0-19小时 → normal / 20-27小时 → warning / ≥28小时 → overload
+ * File-backed implementation of administrator dashboard, user, application, and workload views.
  */
 public class AdminServiceImpl implements AdminService {
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to read users, jobs, and applications
+     */
     public AdminServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * Builds global administrator dashboard metrics and recent application rows.
+     *
+     * @return dashboard metrics, recent applications, and overloaded users
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public Map<String, Object> dashboard() throws IOException {
         List<User> users = storage.loadUsers();
@@ -70,6 +76,16 @@ public class AdminServiceImpl implements AdminService {
         return data;
     }
 
+    /**
+     * Lists safe user copies with optional role and keyword filters.
+     *
+     * @param role optional role filter
+     * @param keyword optional search text
+     * @param page requested page number
+     * @param size requested page size
+     * @return paged users with pagination metadata
+     * @throws IOException if stored user data cannot be read
+     */
     @Override
     public PagedUsers listUsers(String role, String keyword, int page, int size) throws IOException {
         String roleNorm = safe(role).toLowerCase(Locale.ROOT);
@@ -95,6 +111,16 @@ public class AdminServiceImpl implements AdminService {
         return new PagedUsers(rows, meta);
     }
 
+    /**
+     * Lists application rows joined with applicant and job display data.
+     *
+     * @param status optional application status filter
+     * @param module optional module filter
+     * @param keyword optional applicant or job keyword
+     * @param jobId optional job id filter
+     * @return application rows for the administrator view
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public List<Map<String, Object>> listApplications(String status, String module, String keyword, String jobId) throws IOException {
         String statusNorm = safe(status);
@@ -134,6 +160,13 @@ public class AdminServiceImpl implements AdminService {
         return rows;
     }
 
+    /**
+     * Builds TA workload rows and filters them by risk level when requested.
+     *
+     * @param riskLevel optional risk level filter
+     * @return workload rows sorted by total hours descending
+     * @throws IOException if stored data cannot be read
+     */
     @Override
     public List<Map<String, Object>> workload(String riskLevel) throws IOException {
         String riskNorm = safe(riskLevel).toLowerCase(Locale.ROOT);

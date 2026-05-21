@@ -1,24 +1,42 @@
 package com.group02.tars.service;
 
 /**
- * 业务异常 —— Service层发现错误时抛出，被Servlet的catch接住后转成JSON错误响应返回给前端。
- * 携带三个信息：httpStatus(HTTP状态码) + code(错误码，如"AUTH_EMAIL_EXISTS") + message(给用户看的提示)
+ * Checked exception used by services to carry API-ready error metadata.
  */
 public class ServiceException extends Exception {
 
+    /** HTTP status code to return for this service failure. */
     private final int httpStatus;
+    /** Application-level error code to return for this service failure. */
     private final String code;
 
+    /**
+     * Creates a service exception with HTTP and application error information.
+     *
+     * @param httpStatus HTTP status code that should be returned to the client
+     * @param code application-level error code
+     * @param message human-readable error message
+     */
     public ServiceException(int httpStatus, String code, String message) {
         super(message);
         this.httpStatus = httpStatus;
         this.code = code;
     }
 
+    /**
+     * Returns the HTTP status code associated with this failure.
+     *
+     * @return HTTP status code for the JSON response
+     */
     public int httpStatus() {
         return httpStatus;
     }
 
+    /**
+     * Returns the application-level error code associated with this failure.
+     *
+     * @return error code for the JSON response
+     */
     public String code() {
         return code;
     }

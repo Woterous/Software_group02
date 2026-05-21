@@ -16,20 +16,32 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 职位服务实现 —— 处理职位列表、详情、模块列表等查询操作。
- * <p>
- * 信息流：TaApiServlet → JobService接口 → 此处 → FileStorage → jobs.json
- * <p>
- * 所有方法都是读操作，不修改数据。写操作（创建/修改职位）在 MoServiceImpl 中。
+ * File-backed implementation of job listing, detail lookup, and module lookup operations.
  */
 public class JobServiceImpl implements JobService {
 
     private final FileStorage storage;
 
+    /**
+     * Creates the service with shared file storage.
+     *
+     * @param storage storage used to read jobs
+     */
     public JobServiceImpl(FileStorage storage) {
         this.storage = Objects.requireNonNull(storage);
     }
 
+    /**
+     * Lists jobs with optional keyword, module, and status filters.
+     *
+     * @param keyword optional keyword matched against job text
+     * @param module optional module filter
+     * @param status optional status filter
+     * @param page requested page number
+     * @param size requested page size
+     * @return paged jobs with pagination metadata
+     * @throws IOException if stored job data cannot be read
+     */
     @Override
     public PagedResult<Job> listJobs(String keyword, String module, String status, int page, int size) throws IOException {
         List<Job> jobs = new ArrayList<>(storage.loadJobs());
@@ -67,6 +79,14 @@ public class JobServiceImpl implements JobService {
         return new PagedResult<>(pageItems, meta);
     }
 
+    /**
+     * Finds a job by id.
+     *
+     * @param jobId job id to resolve
+     * @return matching job
+     * @throws IOException if stored job data cannot be read
+     * @throws ServiceException if the job does not exist
+     */
     @Override
     public Job getJobById(String jobId) throws IOException, ServiceException {
         return storage.loadJobs().stream()
@@ -75,6 +95,12 @@ public class JobServiceImpl implements JobService {
             .orElseThrow(() -> new ServiceException(HttpServletResponse.SC_NOT_FOUND, "JOB_NOT_FOUND", "Job not found."));
     }
 
+    /**
+     * Lists active jobs whose status is {@code open} or {@code closing}.
+     *
+     * @return active jobs sorted by creation date descending
+     * @throws IOException if stored job data cannot be read
+     */
     @Override
     public List<Job> findOpenOrClosingJobs() throws IOException {
         return storage.loadJobs().stream()
@@ -86,6 +112,12 @@ public class JobServiceImpl implements JobService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * Lists distinct module names from stored jobs.
+     *
+     * @return sorted module names
+     * @throws IOException if stored job data cannot be read
+     */
     @Override
     public List<String> modules() throws IOException {
         return storage.loadJobs().stream()

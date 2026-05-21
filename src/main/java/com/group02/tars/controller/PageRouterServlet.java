@@ -10,16 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Route-only page controller for Sprint 2 frontend-first workflow.
- * Backend business logic is intentionally deferred.
- */
-/**
- * JSP 页面路由 —— 所有 /pages/* 请求由此 Servlet 转发到对应 JSP 文件。
- * <p>
- * 信息流：浏览器 → 此处查ROUTES表 → forward到JSP → JSP渲染HTML → 返回浏览器。
- * <p>
- * 不处理业务逻辑，只做页面跳转。同时还向JSP传递三个属性：
- * appRole（角色）、appPage（当前页标记，侧边栏高亮用）、appRoute（当前路径）。
+ * Routes {@code /pages/*} requests to JSP files and supplies page metadata attributes.
+ *
+ * <p>This servlet performs page forwarding only. Business actions are handled by
+ * the API servlets.</p>
  */
 public class PageRouterServlet extends HttpServlet {
 
@@ -46,6 +40,14 @@ public class PageRouterServlet extends HttpServlet {
         ROUTES.put("/admin/workload", "/WEB-INF/jsp/admin/workload.jsp");
     }
 
+    /**
+     * Forwards a known page route to its JSP target.
+     *
+     * @param req current request
+     * @param resp current response
+     * @throws ServletException if forwarding fails
+     * @throws IOException if the response cannot be written
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getPathInfo();

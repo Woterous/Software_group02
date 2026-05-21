@@ -15,13 +15,11 @@ import jakarta.servlet.ServletContext;
 import java.io.IOException;
 
 /**
- * 服务注册中心 —— Servlet 和 Service 之间的连接点（"电话簿"）。
- * <p>
- * 信息流位置：启动时创建所有Service → Servlet通过它找到需要的Service
- * <p>
- * 为什么需要它：避免在每个Servlet里new Service导致混乱，
- * 全局只创建一份Service实例，所有Servlet共享。
- * 创建时机：BaseApiServlet.init() 调用 ServiceRegistry.from()（单例）。
+ * Servlet-context scoped holder for storage and service instances.
+ *
+ * <p>The registry creates one shared {@link FileStorage} instance and wires all
+ * service implementations to it. API servlets obtain the registry through
+ * {@link #from(ServletContext)} during initialization.</p>
  */
 public class ServiceRegistry {
 
@@ -37,8 +35,10 @@ public class ServiceRegistry {
     private final AiAssistantService aiAssistantService;
 
     /**
-     * 构造时创建所有Service和底层的FileStorage。
-     * 每个Service都拿到同一个storage实例，保证数据一致性。
+     * Creates the storage and service instances for one servlet context.
+     *
+     * @param context servlet context used for storage initialization
+     * @throws IOException if storage cannot be initialized
      */
     private ServiceRegistry(ServletContext context) throws IOException {
         this.storage = new JsonFileStorage(context);
@@ -52,8 +52,11 @@ public class ServiceRegistry {
     }
 
     /**
-     * 获取全局唯一的ServiceRegistry实例（单例模式，用ServletContext做锁）。
-     * 第一次调用时创建并缓存，之后直接返回已创建的实例。
+     * Returns the shared registry stored in the servlet context, creating it on first use.
+     *
+     * @param context servlet context used as registry storage
+     * @return shared service registry
+     * @throws IOException if registry creation fails
      */
     public static ServiceRegistry from(ServletContext context) throws IOException {
         synchronized (context) {
@@ -67,34 +70,74 @@ public class ServiceRegistry {
         }
     }
 
+    /**
+     * Returns the user service.
+     *
+     * @return user service instance
+     */
     public UserService userService() {
         return userService;
     }
 
+    /**
+     * Returns the job service.
+     *
+     * @return job service instance
+     */
     public JobService jobService() {
         return jobService;
     }
 
+    /**
+     * Returns the application service.
+     *
+     * @return application service instance
+     */
     public ApplicationService applicationService() {
         return applicationService;
     }
 
+    /**
+     * Returns the module-organizer service.
+     *
+     * @return module-organizer service instance
+     */
     public MoService moService() {
         return moService;
     }
 
+    /**
+     * Returns the administrator service.
+     *
+     * @return administrator service instance
+     */
     public AdminService adminService() {
         return adminService;
     }
 
+    /**
+     * Returns the CV access service.
+     *
+     * @return CV access service instance
+     */
     public CvAccessService cvAccessService() {
         return cvAccessService;
     }
 
+    /**
+     * Returns the AI assistant service.
+     *
+     * @return AI assistant service instance
+     */
     public AiAssistantService aiAssistantService() {
         return aiAssistantService;
     }
 
+    /**
+     * Returns the shared storage instance.
+     *
+     * @return storage instance used by the services
+     */
     public FileStorage storage() {
         return storage;
     }
